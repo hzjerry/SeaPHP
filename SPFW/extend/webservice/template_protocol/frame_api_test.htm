@@ -1,0 +1,143 @@
+
+<div class="expressArea"><!--信息表达区-->
+	<header>授权信息</header>
+	<div class="form_row"><!--表单信息部分-->
+		<div class="label">公钥</div>
+		<div class="content">
+			<div><input id="id_pub_pwd" type="text" size="40" maxlength="40" placeholder="必须填写" /></div>
+			<memo>请向管理员索取公钥</memo>
+		</div>
+	</div>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>基本数据项</header>
+	<div class="form_row"><!--表单信息部分-->
+		<div class="label">package</div>
+		<div class="content">
+		:<input type="text" size="40" placeholder="必须填写" value="{@tag_package}" readonly />
+		</div>
+	</div>
+
+	<div class="form_row"><!--表单信息部分-->
+		<div class="label">class</div>
+		<div class="content">
+		:<input type="text" size="40" placeholder="必须填写" value="{@tag_class}" readonly />
+		</div>
+	</div>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>提交数据项</header>
+	<div id="id_in_param">loading...</div>
+	<div style="width:450px;">
+		<button type="button" id="btn_exec" style="float:right;" class="action blue"><span class="label">提交请求</span></button>
+	</div>
+	<div>&nbsp;</div>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>请求结果</header>
+	<section>
+        <pre id="id_get_data">请点击【提交请求】按钮</pre>
+	</section>
+</div>
+
+<script src="{@tag_web_path}jQuery.strtr.js"></script><!--jquery str库-->
+<script src="{@tag_web_path}jQuery.md5.min.js"></script><!--jquery md5库-->
+<script src="{@tag_web_path}jQuery.api_comm.js"></script><!--jquery md5库-->
+<script>
+var msUrl = '{@tag_enter_url}';
+var msRoot = '{@tag_root_name}';
+var moInParam = {@tag_in_protocol_json};
+var msTemplate =
+    '<div class="form_row">'+
+	'  <div class="content">'+
+	   '<input type="checkbox" id="cb_{@js_tag_id}" title="选中状态下，将送出此节点的信息" value="{@js_tag_id}" checked/>'+
+	   '<input type="text" id="{@js_tag_id}" size="50" placeholder="{@js_tag_name}" value=""/>(key: {@js_tag_name})<br />'+
+	'    <memo>{@js_tag_hint}</memo>'+
+	'  </div>'+
+	'</div>';
+var maInputKeys = new Array();
+
+$(function()
+{
+	var $divParam = $('#id_in_param');
+	//根据moInParam参数，生成输入参数框
+	var aData = new Array();
+	for (var sKey in moInParam[msRoot])
+	{
+		if ( typeof moInParam[msRoot][sKey] != undefined && moInParam[msRoot][sKey].hasOwnProperty('C'))//内容值
+		{
+            aData.push($.strtr(msTemplate,
+                    {'{@js_tag_name}':sKey,
+                     '{@js_tag_id}' : sKey,
+                     '{@js_tag_hint}':moInParam[msRoot][sKey].C}));
+            maInputKeys.push(sKey);
+		}
+		if ( typeof moInParam[msRoot][sKey].A == 'object' )
+		{	//存在属性值
+			var sKeyJoin = '';
+			for (var sArrtibKey in moInParam[msRoot][sKey]['A'])
+			{
+				sKeyJoin = sKey +'A__A'+ sArrtibKey; //合并属性与Tag模式
+                aData.push($.strtr(msTemplate,
+                        {'{@js_tag_name}' : sKey +'.'+sArrtibKey,
+                         '{@js_tag_id}' : sKeyJoin,
+                         '{@js_tag_hint}' : moInParam[msRoot][sKey]['A'][sArrtibKey]}));
+                maInputKeys.push(sKeyJoin);
+			}
+		}
+	}
+    $divParam.html(aData.join(''));
+    //批量绑定选中发送节点的事件
+    for (var sKey in moInParam[msRoot])
+    {
+    	$('#cb_'+sKey).bind('click', null, function()
+    	{  //判断取消发送选中时，
+    		if (this.checked)
+    			$('#'+this.value).attr('disabled', false);
+    		else
+    			$('#'+this.value).attr('disabled', true)
+    	})
+    }
+
+    //发送按钮事件
+	$('#btn_exec').click(function()
+	{	//提交的异步处理
+        var aOutBuf = new Array(); //输出栈缓存
+        var sPwd = $.trim($('#id_pub_pwd').val());
+        if (sPwd == '')
+        {
+            alert('公钥必须输入。');
+            return ;
+        }
+        for(var i= 0,iLoop=maInputKeys.length; i< iLoop; i++)
+        {
+            var sVal = $.trim($('#'+maInputKeys[i]).val());
+            var cbOut = $('#cb_'+maInputKeys[i]); //输出节点控制
+            if (!cbOut.is(':checked'))
+            	continue; //跳过未选中的节点
+            else
+            {
+	            if (sVal == '')
+	            {
+	                alert('参数: '+ $.strtr(maInputKeys[i], {'A__A':'.'}) +' 的值不能为空。');
+	                return ;
+	            }
+	            else
+	                aOutBuf.push( $.strtr(maInputKeys[i], {'A__A':'.'}) +'='+ encodeURIComponent(sVal)); //输出值压栈
+            }
+        }
+
+        $('#id_get_data').text('正在通信中，请稍候...'); //提示WebService通信中
+        oAPI.msURL = msUrl;
+        oAPI.msPWD = sPwd;
+        oAPI.execGet('{@tag_package}', '{@tag_class}', aOutBuf.join('&'), function(data,status)
+        {
+            $('#id_get_data').text(data);
+        });
+	});
+})
+
+</script>

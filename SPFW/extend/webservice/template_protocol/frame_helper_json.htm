@@ -1,0 +1,19 @@
+
+<div class="expressArea"><!--信息表达区-->
+	<header>JSON的特殊数据结构</header>
+	<section>
+		<p>由于本Web Service框架核心的解析规则是对XML进行进行解析，而JSON无法像XML协议那样在一个tag节点中同时存在属性与值。因此采用了一种特殊结构来组织JSON。但是请放心，该结构符合json的解析规则，只是在表示形态上有所差异。</p>
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>XML结构的JSON对象解释</header>
+	<section>
+		<p>在JSON中对于节点的表示与XML是相同的，例如:{"name":{"subname":{"C":"xcvb"}}}，其中的name与subname就是XML中对应的Tag；上述Json字符串对应的XML结构如下所示： &lt;name&gt;&lt;subname&gt;xcvb&lt;/subname&gt;&lt;/name&gt;，每个节点的内容与属性都以一个对象的形式来表现，节点层次之间的嵌套在json中就是对象的嵌套。</p>
+		<p>节点的内容表示方式（以一段XML举例）：&lt;tag&gt;content&lt;/tag&gt;，与之对应的json节点值为{"tag":{"C":"content"}}；由此可见节点的值以一个<strong>大写的"C"</strong>来表示。</p>
+		<p>节点的属性表示方式（以一段XML举例）：&lt;tag att1="123" id="xxe" /&gt;，与之对应的json节点值为{"tag":{"A":{"att1":"123", "id":"xxe"}}}；由此可见节点的属性以一个<strong>大写的"A"</strong>来表示。</p>
+		<p>节点内容与属性共存的表示（以一段XML举例）：&lt;tag att1="123" id="xxe" &gt;content&lt;/tag&gt;，与之对应的json节点值为{"tag":{"A":{"att1":"123", "id":"xxe"}, "C":"content"}}。</p>
+		<p>同名兄弟节点的表示（以一段XML举例）：&lt;root&gt;&lt;tag att1="123" id="xxe" /&gt;&lt;tag att1="234" id="asd" /&gt;&lt;/root&gt;，与之对应的json节点值为:<br /> {"root":{ "tag":[{"A":{"att1":"123", "id":"xxe"}}, {"A":{"att1":"234", "id":"asd"}}] }}；所以同名兄弟节点以数组的方式表示所有的属性节点。</p>
+		<p>当你熟悉上述规则后，就能很容易看懂Web Service的协议中，JSON协议的内容。</p>
+	</section>
+</div>

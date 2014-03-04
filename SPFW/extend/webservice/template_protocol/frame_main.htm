@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width"/>
+
+		<link rel="stylesheet" type="text/css" href="{@tag_web_path}web_main_V1.min.css" /><!--系统框架主样式-->
+		<link rel="stylesheet" type="text/css" href="{@tag_web_path}web_form_V1.min.css" /><!--系统框架主样式-->
+		<link rel="stylesheet" type="text/css" href="{@tag_web_path}button_google_style.min.css" /><!--按钮样式-->
+		<link rel="shortcut icon" href="/favicon.ico"><!--ico图标-->
+		<link rel="apple-touch-icon" href="#"><!--苹果移动终端放到桌面的具有玻璃效果的图标-->
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script><!--jquery 基础库-->
+
+		<title>Web Service Protocol View</title>
+	</head>
+
+	<body>
+		<header id="gc-googlebar"><!--头部Banner块-->
+		<div style="float:right;padding-right:5px;">权限组:{@tag_purview}&nbsp;&nbsp;<a href="?logout=1">【切换】</a></div>
+		<div><h1>{@tag_project_name} Web Service Protocol View</h1></div>
+		</header>
+
+		<div id="gc-topnav"><!--顶部导航块-->
+			<div>
+				<ul><!--顶部导航信息-->
+					{@tag_top_nav}
+				</ul>
+			</div>
+		</div>
+
+		<div id="gc-content"><!--内容块-->
+			<div class="subtitle">{@tag_top_prompt_area}</div><!--模块子标题介绍区-->
+
+			<div class="content-frame">
+				<div class="cf_menu"><!--菜单区-->
+					<!--package节点选择区-->
+					<!--class节点选择区-->
+					{@tag_left_menu_list}
+				</div>
+
+				<div class="cf_body"><!--内容区-->
+				{@tag_content_view}
+				</div>
+			</div>
+		</div>
+
+
+		<div id="gc-footer">
+			<div>
+			&copy;{@tag_project_name} {@tag_year}.
+			&nbsp;&nbsp;&nbsp;Html 5 + Css 3 technology to build.
+			&nbsp;&nbsp;Ver: {@tag_protocol_view_ver}
+			</div>
+		</div>
+
+	</body>
+</html>

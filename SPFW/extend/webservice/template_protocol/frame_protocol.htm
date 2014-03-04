@@ -1,0 +1,64 @@
+
+<div class="noteMsg" style="clear:both"><!--提示区-->
+	路由信息：<br/>
+	<strong>Package: </strong>{@tag_package_path}&nbsp;&nbsp;&nbsp;
+	<strong>Class : </strong>{@tag_class_name}
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>接口介绍</header>
+	<section>
+		<strong>包&nbsp;功&nbsp;能&nbsp;:&nbsp;</strong>{@tag_package_explain}<br />
+		<strong>类&nbsp;功&nbsp;能&nbsp;:&nbsp;</strong>{@tag_class_explain}<br />
+		<strong>使用介绍:&nbsp;</strong>{@tag_use_explain}<br />
+		<strong>公&nbsp;开&nbsp;度&nbsp;:&nbsp;</strong>{@tag_access}
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>入口协议约定(Http Get方式访问)</header>
+	<section>
+		{@tag_in_get_protocol_view}
+	</section>
+</div>
+<div class="helpMsg">
+	使用Get的方式提交请求信息时，要注意URL的QueryString中每个'='后面的值必须要符合 [RFC1738] 规范对参数进行编码。 URL的总长度不可超过2048btye。<br />
+	<strong>注意</strong> : 当入口协议节点的层次只有一层且不含同名兄弟节点时，才能使用get方式访问。
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>入口协议约定({@tag_protocol_type}格式)</header>
+	<section>
+		<pre>{@tag_in_protocol_view}</pre>
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>出口协议约定({@tag_protocol_type}格式)</header>
+	<section>
+		<pre>{@tag_out_protocol_view}</pre>
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>result节点返回状态值说明</header>
+	<section>
+	{@tag_result_api_state_list}
+	<hr style="border-top:1px dashed black;width:50%"/>
+	{@tag_result_system_state_list}
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>更新记录</header>
+	<section>
+	{@tag_update_log}
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>接口测试</header>
+	<section>
+	{@tag_test_api_button}
+	</section>
+</div>

@@ -1,0 +1,57 @@
+
+<div class="expressArea"><!--信息表达区-->
+	<header>如何访问接口</header>
+	<section>
+		<p>Web Service 的访问URL地址为：{@tag_enter_url}</p>
+		<p>如你所见，其Web Service入口的Url地址是唯一的，所有服务都使用同一个入口进行访问请求。您所要做的就是遵从接口所定义的协议标准，访问它所提供的所有服务。WebService服务支持现在最成熟的两种传输协议，他们分别是XML协议与JSON协议，关于这两种传输协议的介绍，请查阅网上的介绍。</p>
+		<p>Web Service 的URL访问接口 通过: <strong>protocol_type=xml</strong> 参数来控制您当前想使用的是哪种协议，系统默认使用xml协议（因此如果你使用xml协议则可以移除这个参数的设置），如果你想使用json协议，请这样写<strong>protocol_type=json</strong>。</p>
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>接口的使用</header>
+	<section>
+		<p>你可以通过查询每个各自API定义的访问协议，按照请求协议的要求对其进行访问。访问的方式是使用 http post的方式，将请求数据发送给Web Service的Url入口地址。 Web Server接收到访问请求后，会给返回对应API服务请求的结果集。</p>
+		<p>API服务的定位通过两个参数实现： package 与 class 。你会在每个API服务约定协议中都看到这两个参数。package: 表示API服务所在的包；class: 表示需要响应哪个API服务逻辑的类名称</p>
+		<p><strong>checksum</strong> 是一个重要的请求参数节点，使用接口服务时必须按照 {@tag_project_name} 提供的公钥按照约定的加密算法来生成验证码。否则Web Service会拒绝你的访问请求。</p>
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>协议规范</header>
+	<section>
+		<p>本Web Service框架严格遵照标准的XML1.0规范协议，在使用时请严格遵照，以免出现意想不到的结果。</p>
+		<p><strong>约定1</strong>：tag与属性名必须使用小写； 例如&lt;tag att1="..."&nbsp;&nbsp;att2="XYZ"/&gt;</p>
+		<p><strong>约定2</strong>：每个节点必须关闭；例如： &lt;tag att1="..."/&gt; 或 &lt;tag&gt;...&lt;/tag&gt;</p>
+		<p><strong>约定3</strong>：必须要有一个顶级节点(如root)；例如： &lt;root&gt; &lt;tag att1="..."/&gt; &lt;/root&gt;</p>
+		<p><strong>约定4</strong>：XML协议的保留字如果存在内容中，必须转义；保留字转换规则如下：[
+		"&amp;"=&gt;&amp;amp; &nbsp;
+		"&lt;"=&gt;&amp;lt; &nbsp;
+		"&gt;"=&gt;&amp;gt; &nbsp;
+		"'"=&gt;&amp;apos; &nbsp;
+		"""=&gt;&amp;quot; ]</p>
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>checksum的生成算法</header>
+	<section>
+		<p>checksum的value属性成算法为：md5(package + class + unix_timestemp + 公钥)；其中md5()使用32位长度，package为协议中的包名；class为协议中的API服务逻辑名；unix_timestemp是Unix新纪元(格林威治时间1970年1月1日00:00:00)到当前时间的秒数(php:time() | java:System.currentTimeMillis()/1000 | JavaScript:Math.round(new Date().getTime()/1000))；公钥向管理员申请。</p>
+		<p>xml传输协议下，checksum节点形式如下: &lt;checksum value="校验码md5(32位)" unix_timestemp="1375835368"/&gt;</p>
+		<p>json传输协议下，checksum节点形式如下: "checksum":{"A":{"value":"校验码md5(32位)", "unix_timestemp":1375835368}}</p>
+		<p>Get请求方式下，checksum节点形式如下: checksum.value=校验码md5(32位)&amp;checksum.unix_timestemp=1375835368}}</p>
+		<p><strong>备注:</strong>如果本地时间与服务器时差超出1小时，则可以调用接口 Package: system.public&nbsp;&nbsp;&nbsp;Class : GET_TIME_DIFFERENCE&nbsp;&nbsp;来获得与服务器之间的时差值（访问这个接口时不需要提供checksum校验节点）。</p>
+	</section>
+</div>
+
+<div class="expressArea"><!--信息表达区-->
+	<header>使用GET方式进行简单数据结构的访问</header>
+	<section>
+		<p>当API接口的服务协议中，入口协议只有一层结构，且不存在同名兄弟节点，这种情况下可通过HTTP的GET方式直接提交请求字符串，这样接口的调用访问会变得异常的简单。但对于大数据量的提交，依然建议使用xml或json的数据协议通过HTTP的POST方式来进行传输，这样可以用到浏览器数据压缩传输的功能，能提高通信效率且更加安全。</p>
+		<p>GET字符串参数与xml结构数据的对应关系：1、属性的表示方式为 tag.arrtib=....；2、内容的表示方式为 tag2=....；由此按照这个结构将每个节点用"&amp;"进行连接，送到url地址中。</p>
+		<p>使用方式(以xml结构示例)：&lt;root&gt;&lt;package&gt;test.user&lt;/package&gt;&lt;class&gt;GET_LIST&lt;/class&gt;&lt;id&gt;x012345&lt;/id&gt;&lt;info page="1" pagesize="20"/&gt;&lt;checksum value="wwwwwwww" unix_timestemp="unix时间戳" /&gt;&lt;/root&gt;</p>
+		<p>如上所述的xml入口协议规则，对应的GET字符串为：<br />
+		?package=test.user&amp;class=GET_LIST&amp;id=x012345&amp;info.page=1&amp;info.pagesize=20&amp;checksum.value=wwwwwwww&amp;checksum.unix_timestemp=unix时间戳 </p>
+		<p><strong>注意 :</strong> "="后面的值，必须依照 [RFC1738] 规范对参数做urlencode编码，且最终的Url的总长度不可超过2048btye。</p>
+	</section>
+</div>

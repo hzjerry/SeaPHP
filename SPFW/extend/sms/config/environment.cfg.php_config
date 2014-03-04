@@ -1,0 +1,22 @@
+<?php
+/**
+ * SMS短信模块的配置文件
+ *
+ * @var array
+ * */
+return array
+(
+	'sms_account'=>array(
+		//[0]默认配置：基础帐号（普通的短信单向群发用）
+		array('api_class'	=> 'CSMS_ApiYoue', //接入的API模块类
+			   'account'	=> '...', //账户用户名
+			   'pwd'	=> '...', //帐户密码
+		),
+		//[1]验证码发送帐号(快读达到无需验证的帐号)
+		array('api_class'	=> 'CSMS_ApiYoue', //接入的API模块类
+			   'account'	=> '...', //账户用户名
+			   'pwd'	=> '...', //帐户密码
+		),
+	),
+);
+?>

@@ -1,0 +1,56 @@
+<?php
+/**
+ * 数据库链接配置类<br/>
+ * @author Jerryli(hzjerry@gmail.com)
+ * @version V0.20130430
+ * @package SPFW.extend.db.dsn.runtime
+ * @final
+ * */
+final class CDbCfgLocalTest implements IDbDSN
+{
+	/* (non-PHPdoc)
+	 * @see IDbDSN::getRW()
+	 */
+	public function getRW()
+	{
+		return array
+		(
+			'host'		=>'localhost', /*DB host address*/
+			'username'	=>'...', /*LoginUserName*/
+			'pwd'		=>'...', /*LoginPassword*/
+			'dbname'	=>'...', /*DateBaseName*/
+			'port'		=>3306 /*link port*/
+		);
+	}
+
+	/* (non-PHPdoc)
+	 * @see IDbDSN::getR()
+	 */
+	public function getR()
+	{
+		return null;
+// 		return array
+// 		(	//分布式只读库配置（如果存在多个，系统会随机选择一个连接）
+// 			array('host'=>'', 'username'=>'', 'pwd'=>'', 'dbname'=>'', 'port'=>3306),
+// 			array('host'=>'', 'username'=>'', 'pwd'=>'', 'dbname'=>'', 'port'=>3306),
+// 		);
+// 		return array
+// 		(	//分布式只读库配置（如果存在多个，系统会随机选择一个连接）
+// 			array('host'=>'localhost', 'username'=>'root', 'pwd'=>'821016', 'dbname'=>'test', 'port'=>3306),
+// 		);
+	}
+
+	/* (non-PHPdoc)
+	 * @see IDbDSN::getEnvironment()
+	 */
+	 public function getEnvironment()
+	 {
+		return array
+		(
+			'prefix'		=>'', /*表前缀*/
+			'table_upper_lower'	=>'lower', /*表名强制大写[upper:强制大写|lower:强制小写|intact:保持原样]*/
+			'db_driver'		=>'mysqli' /*数据库驱动[mysql:兼容新最好|mysqli:性能最好]*/
+		);
+	}
+}
+?>

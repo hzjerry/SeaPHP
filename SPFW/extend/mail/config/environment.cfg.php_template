@@ -1,0 +1,17 @@
+<?php
+/**
+ * Mail模块的配置文件
+ *
+ * @var array
+ * */
+return array
+(
+'mail_host'	=> 'mail.abc.net', //smtp发件服务器地址
+'account_name'	=> 'do-not-reply@abc.net', //发件人账户的用户名(smtp)
+'account_pwd'	=> 'lijian12', //发件人账户的密码
+'from_address'	=> 'do-not-reply@abc.net', //发件人邮件地址(一般与发件人账户名相同)
+'from_name'	=> '系统(请勿回复)', //发件人名字
+'monitor_addr'	=> 'lijian@abc.mobi', //默认监控地址(抄送地址)
+'template'	=> 'workgroup.mail.template', //邮件模板目录(目录下的text:文本邮件模板, html:网页邮件模板, signature:签名模板)
+);
+?>

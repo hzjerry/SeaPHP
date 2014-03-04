@@ -1,0 +1,16 @@
+<?php
+/**
+ * AliOSS模块的配置文件
+ *
+ * @var array
+ * */
+return array
+(
+'host'			=> 'oss.aliyuncs.com', //主机头
+'host_internal'		=> 'oss-internal.aliyuncs.com', //内网访问主机头
+'bridge'		=> 'oss_bridge.php', //内网转发网桥文件(CAliOssInternalBridge类用)
+'AccessKeyId'		=> '...', //OSS帐号
+'AccessKeySecret'	=> '...', //授权码
+'defalutBucket'		=> '...', //默认的Bucket
+);
+?>

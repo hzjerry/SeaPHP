@@ -34,5 +34,4 @@ class getAllList extends CWebsiteModule
 		$this->view->makeStaticCache($sCtl);
 	}
 }
-
 ?>

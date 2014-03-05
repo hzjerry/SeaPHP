@@ -120,7 +120,7 @@ class CCache extends CExtModule
 	 *
 	 * @param string $sKey 缓存键值
 	 * @param mixed $mVal 需要保存的对象
-	 * @param int $iExpire 失效时间
+	 * @param int $iExpire 失效时间（秒）
 	 * @return bool
 	 * @access public
 	 */
@@ -160,7 +160,7 @@ class CCache extends CExtModule
 	}
 
 	/**
-	 * 回收所有缓存资源
+	 * 回收所有缓存资源（不管是否到期都释放）
 	 * @return bool
 	 */
 	public function gc()

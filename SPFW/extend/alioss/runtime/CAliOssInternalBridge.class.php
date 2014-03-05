@@ -1,11 +1,13 @@
 <?php
 /**
  * 阿里OSS云存储操作内部转发网桥<br/>
+ * 通过阿里云内网服务器做OSS的反向代理，将OSS上的存储对象取出。
  * @author Jerryli(hzjerry@gmail.com)
  * @version V0.20130817
  * @package SPFW.extend.db.runtime
  * @final
  * @example OSS操作
+ * http get: oss_bridge.php?u=oss对象的url访问地址
  * <pre>
  * 	CExtendManage::Run(new CAliOssInternalBridge());
  * </pre>

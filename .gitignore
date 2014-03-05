@@ -1,0 +1,27 @@
+# develop file path
+/design/
+
+# Configs
+/SPFW/extend/alioss/config/environment.cfg.php
+#/SPFW/extend/cache/config/environment.cfg.php
+#/SPFW/extend/cache/config/memcache.cfg.php
+/SPFW/extend/db/dsn/CDbCfgLocalTest.php
+/SPFW/extend/mail/config/environment.cfg.php
+/SPFW/extend/sms/config/environment.cfg.php
+#/SPFW/extend/webservice/config/environment.cfg.php
+#/SPFW/extend/webservice/config/package_access_pwd.cfg.php
+#/SPFW/extend/webservice/config/auth_protocol.cfg.php
+#/SPFW/extend/website_engine/config/environment.cfg.php
+#/SPFW/extend/website_engine/config/entrance.cfg.php
+
+# Test file
+
+# Eclipse project files
+.settings
+.buildpath
+.project
+
+# My test temp file
+/ripple_test.php
+/info.php
+/index.php

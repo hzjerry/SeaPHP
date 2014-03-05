@@ -6,6 +6,6 @@
  * */
 return array
 (
-'cache_type' => 'memcache', //缓存类型[filecache:文件缓存|memcache:分布式内存缓存]
+'cache_type' => 'filecache', //缓存类型[filecache:文件缓存|memcache:分布式内存缓存]
 );
 ?>

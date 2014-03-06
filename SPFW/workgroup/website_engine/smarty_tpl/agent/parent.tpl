@@ -3,13 +3,12 @@
  <head>
   <title><%block name="title"%>title:<%/block%></title>
 <script type="text/javascript">
-function getSpecificCookie(name)
-{
-	if(document.cookie.length > 0)
-	{
+function getSpecificCookie(name){
+	var start = null;
+	var end = null;
+	if(document.cookie.length > 0){
 		start = document.cookie.indexOf(name + "=");
-		if( start != -1)
-		{
+		if( start != -1){
 			start = start + name.length + 1;
 			end = document.cookie.indexOf(";",start);
 			if( end == -1)
@@ -20,14 +19,14 @@ function getSpecificCookie(name)
 	return "";
 }
 
-window.onload = function()
-{
-	alert(getSpecificCookie('agent_usersex'));
+window.onload = function(){
+	alert('cooike test [rember]:'+ getSpecificCookie('agent_rember'));
 }
 </script>
  </head>
 
  <body>
-	网站模板替换测试,我的名字是<%block name="username"%>小王<%/block%>
+	网站模板替换测试,我的用户名是<%block name="username"%>小王<%/block%>
+	<div><a href="?LoginOpt-loginOut">退出登录</a></div>
  </body>
 </html>

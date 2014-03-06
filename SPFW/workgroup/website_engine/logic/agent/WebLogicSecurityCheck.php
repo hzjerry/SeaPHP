@@ -24,11 +24,14 @@ final class WebLogicSecurityCheck extends CWebsiteSecurity
 		//TODO:此处编写用户授权访问的业务逻辑
 		if (!in_array($sPkg, self::$maPublicList)) //不对LoginOpt与ajax.LoginOrReg任何做安全检查
 		{
-			echo '正在做用户访问权限检查:',
-			'<br/><strong>Pkg:</strong>', $sPkg,
-			'<br/><strong>Act:</strong>', $sAct,
-			'<br/>用户是否授权操作可修改这个类文件:'.__DIR__.'\\'. __CLASS__ .'.php',
-			'<br/>';
+			if (is_null($this->session->get('login_state')))
+			{
+				echo '用户未授权:',
+				'<br/><strong>Pkg:</strong>', $sPkg,
+				'<br/><strong>Act:</strong>', $sAct,
+				'<br/>用户是否授权操作可修改这个类文件:'.__DIR__.'\\'. __CLASS__ .'.php',
+				'<br/>';
+			}
 		}
 	}
 }

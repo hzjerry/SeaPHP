@@ -34,15 +34,31 @@ class LoginOpt extends CWebsiteModule
 			else
 				$this->setCookie('rember', 'false');
 
-			$this->view->showMsg('succ', '登录成功', '登录测试');
+			//建立用户会话
+			$this->session->set('login_state', true);
+			$this->session->set('logname', $sUName);
+			$this->session->set('pwd', $sPWD);
+
+			$this->view->showMsg('succ', '登录成功，即将进入主页面', '登录测试', '?MainHome');
 		}
 		else
 		{
+			$this->session->destroy(); //释放session
 			$this->view->loadStaticCache(null, 30); //检查是否命中缓存
 			$this->view->showPage('LoginOpt_login.tpl');
 			$this->view->makeStaticCache(); //创建静态缓存
 		}
 	}
-}
 
+	/**
+	 * 注销
+	 * @param string $sCtl
+	 * @return void
+	 */
+	public function loginOut($sCtl)
+	{
+		$this->session->destroy(); //释放session
+		redirect('?LoginOpt-login'); //回到登录页面
+	}
+}
 ?>

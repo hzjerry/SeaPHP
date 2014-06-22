@@ -7,6 +7,7 @@
  * @see
  * <li>2013-05-07 jerryli 创立</li>
  * <li>2013-12-19 jerryli left_join(),from() 增加了强制指定索引</li>
+ * <li>2014-06-22 jerryli 增加了UNID()函数，生成唯一识别号用于insert时的id字段(用于bigint字段)</li>
  */
 class CDbCURD
 {
@@ -102,6 +103,19 @@ class CDbCURD
 			return ' \''. strtr(trim($Val), $aRep) .'\' ';
 		else
 			return '\'\' ';
+	}
+
+	/**
+	 * 生成唯一识别号序列<br />
+	 * 备注:时间从2014-01-01日开始计算的unix时间戳<br/>
+	 * 精度：100ns，并在末尾加3位随机数
+	 * @return string bigint型字符串，最大长度2^64
+	 * @access public
+	 * @static
+	 */
+	static public function UNID()
+	{
+		return join(array(floor((microtime(true)-1387584000)*10000), rand(100,999)));
 	}
 
 	/**

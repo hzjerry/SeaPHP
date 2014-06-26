@@ -7,8 +7,8 @@
  * */
 final class dbg
 {
-	const mTEMPLATE_GENERAL = '<pre>{@val}</pre>';
-	const mTEMPLATE_TITLE = '<pre>{@title}:{@val}</pre>';
+	const mTEMPLATE_GENERAL = '<pre style="clear:both;">{@val}</pre>';
+	const mTEMPLATE_TITLE = '<pre style="clear:both;">{@title}:{@val}</pre>';
 
 	/**
 	 * 打印一个对象到字符串

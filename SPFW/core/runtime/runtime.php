@@ -5,13 +5,13 @@
  * @author Jerryli(hzjerry@gmail.com)
  * @package SPFW.core.runtime
  * @version V20130415
+ * <li>V20140626 修改了microtime()函数，提高运行效率</li>
  */
 defined('SEA_PHP_INIT') or exit('sea php framework initialization step is not valid.'); //功能:让框架必须按顺序加载
 define('SEA_PHP_RUNTIME', true);  //功能:tag
 
 //记录架构运行的开始时间
-list($usec, $sec) = explode(' ', microtime());
-$GLOBALS['SEA_PHP_FW_VAR_BEGIN_TIMESTEMP'] = floatval($usec) + floatval($sec); //启动时间保存
+$GLOBALS['SEA_PHP_FW_VAR_BEGIN_TIMESTEMP'] = microtime(true); //启动时间保存
 
 //加载基本静态函数
 require_once($GLOBALS['SEA_PHP_FW_DIR_MACHINE_ROOT'] .

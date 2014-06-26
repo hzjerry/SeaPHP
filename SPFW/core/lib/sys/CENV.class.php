@@ -6,6 +6,8 @@ defined('SEA_PHP_RUNTIME') or exit('sea php framework initialization step is not
  *
  * @package SPFW.core.lib.sys
  * @global SEA_PHP_FW_VAR_ENV, SEA_PHP_FW_VAR_BEGIN_TIMESTEMP
+ * @version
+ * <li>V20140626 修改了修改了getRuntime函数，提高运行效率</li>
  * */
 class CENV
 {
@@ -32,8 +34,7 @@ class CENV
 	 */
 	static public function getRuntime()
 	{
-		list($usec, $sec) = explode(" ",microtime());
-		return ((floatval($usec) + floatval($sec)) - $GLOBALS['SEA_PHP_FW_VAR_BEGIN_TIMESTEMP']) * 1000;
+		return (microtime(true) - $GLOBALS['SEA_PHP_FW_VAR_BEGIN_TIMESTEMP']) * 1000;
 	}
 
 	/**

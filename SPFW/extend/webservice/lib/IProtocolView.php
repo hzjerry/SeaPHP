@@ -34,7 +34,7 @@ interface IProtocolView
 	/**
 	 * 返回入口协议<br/>
 	 *   备注：返回为Xml结构数组<br/>
-	 *   变量长度定义建议值: [min:最小(值|长度)] | [max:最大(值|长度)] | [fixed:固定长度] | [val:起始值~N]
+	 *   变量长度定义建议值: [min:最小(值|长度)] | [max:最大(值|长度)] | [fixed:固定长度] | [val:起始值~N] | [list:列表值|...|...]
 	 * @return array
 	 * @access public
 	 */

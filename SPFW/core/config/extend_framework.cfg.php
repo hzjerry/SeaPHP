@@ -26,5 +26,7 @@ return array
 	array('package'=>'extend.alioss.runtime',	'file'=>'CAliOssInternalBridge.class.php'),
 'CSMS'=> //短信发送模块
 	array('package'=>'extend.sms.runtime',	'file'=>'CSMS.class.php'),
+'CWebServiceClient'=> //SeaPHP WebService 专用的Client 操作对象
+	array('package'=>'extend.webservice_client.runtime',	'file'=>'CWebServiceClient.class.php'),
 );
 ?>

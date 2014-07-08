@@ -203,7 +203,7 @@ class CDbCURD
 	/**
 	 * 操作的表名<br />
 	 * 用于: SELECT | DELECT | UPDATE 操作
-	 * @param string $sTableName	表名
+	 * @param string $sTableName	表名(会自动添加表前缀)
 	 * @param string $sByname		表别名(默认为null;在left_join()子句中会使用)
 	 * @param string $sIndexName	强制使用指定的索引(默认null)
 	 * @return CDbCURD
@@ -231,7 +231,7 @@ class CDbCURD
 	 * 因为$sByname就是left_join()中$sLeftByname需要使用的参数
 	 * 用于: SELECT | DELECT | UPDATE 操作
 	 * @param string $sLeftByname 主表别名
-	 * @param string $sJoinTable 被关联表
+	 * @param string $sJoinTable 被关联表(会自动添加表前缀)
 	 * @param string $sJoinByname 被关联表别名(''|null|别名)
 	 * @param string|array $aJoinId 关联字段 'field' 或 array('left_field', 'join_field')
 	 * @param string $sIndexName 强制使用指定的索引(默认null)

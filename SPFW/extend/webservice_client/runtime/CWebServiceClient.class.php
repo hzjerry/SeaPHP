@@ -62,6 +62,8 @@ class CWebServiceClient extends CExtModule{
 		}else{
 			CErrThrow::throwExit('Load cfg fail.', '['. $sCfgName .']does not exist');
 		}
+		unset($oCfg);
+		$oCfg = null;
 
 		if (empty(self::$_oPost)){ //创建通信对象
 			self::$_oPost = new CPostHttp();

@@ -3,9 +3,10 @@
  * 数据库驱动抽象类<br/>
  * 备注：数据库驱动必须继承这个类
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20130501
  * @package SPFW.extend.db.lib
  * @abstract
+ * @version V0.20130501
+ * <li>V0.20140626 修改了microtime()参数，提高效率</li>
  */
 abstract class CDbDriver
 {
@@ -132,8 +133,7 @@ abstract class CDbDriver
 	 */
 	protected function startTimer()
 	{
-		list($usec, $sec) = explode(' ', microtime());
-		$this->mfTimer = (floatval($usec) + floatval($sec));
+		$this->mfTimer = microtime(true);
 	}
 
 	/**
@@ -143,8 +143,7 @@ abstract class CDbDriver
 	 */
 	private function endTimer()
 	{
-		list($usec, $sec) = explode(" ",microtime());
-		return round( ((floatval($usec) + floatval($sec)) - $this->mfTimer) * 1000 , 4);
+		return round( (microtime(true) - $this->mfTimer) * 1000 , 4);
 	}
 
 	/**

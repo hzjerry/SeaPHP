@@ -3,7 +3,9 @@
  * Xml与Php数组的双向映射处理<br/>
  *   备注:严格遵照XML 1.0协议标准，所有属性名称与tag名称都将强制转换为小写
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20130413
+ * @version V0.20140719
+ * <li>V0.20130413 jerryli 创建</li>
+ * <li>V0.20140719 jerryli 修正了xml2array()中的bug导致兄弟节点输出异常</li>
  * @package SPFW.core.lib.final
  * @see CConverCharset
  * @example
@@ -11,8 +13,7 @@
  *  $aRet = $oXml->getArray($data);
  *  _dbg(strtr($oXml->getStrPacket($aRet), CXmlArrayConver::$msEntities));
  * */
-final class CXmlArrayConver implements IXmlJsonConverArray
-{
+final class CXmlArrayConver implements IXmlJsonConverArray{
 	/**
 	 * xml输出时格式化用的前缀符号
 	 * @var string
@@ -54,16 +55,12 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @param string $sCharset xml使用的字符集
 	 * @see IXmlJsonConverArray::__construct()
 	 */
-	function __construct($sRoot = 'boot', $sCharset='utf-8')
-	{
+	function __construct($sRoot = 'boot', $sCharset='utf-8'){
 		static $sPHP_VER = PHP_VERSION;
-		if (intval($sPHP_VER{0}) < 5)
-		{
+		if (intval($sPHP_VER{0}) < 5){
 			echo 'PHP version is too low, there is no SimpleXMLElement class.';
 			exit(0);
-		}
-		else
-		{
+		}else{
 			$this->msRootNode = $sRoot;
 			$this->msCharset = $sCharset;
 			$this->moConvt = new CConverCharset($sCharset);
@@ -73,8 +70,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	/**
 	 * 析构函数
 	 */
-	function __destruct()
-	{
+	function __destruct(){
 		unset($this->moConvt);
 	}
 
@@ -83,8 +79,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @param string $sStr 数据
 	 * @return string
 	 */
-	private function encodeCharset(& $sStr)
-	{
+	private function encodeCharset(& $sStr){
 		return strtr($this->moConvt->toTarget(trim($sStr)), self::$msEntities);
 	}
 
@@ -93,8 +88,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @param string $sStr 数据
 	 * @return string
 	 */
-	private function decodeCharset(& $sStr)
-	{
+	private function decodeCharset(& $sStr){
 		static $sREntities = null;
 		if (empty($sREntities))
 			$sREntities = array_flip(self::$msEntities);
@@ -107,8 +101,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @param string $sStr 数据
 	 * @return string
 	 */
-	private function O($sStr)
-	{
+	private function O($sStr){
 		if ($this->mbOutputFormat)
 			return $sStr;
 		else
@@ -121,13 +114,11 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @return array | null
 	 * @see IXmlJsonConverArray::getArray()
 	 */
-	public function getArray($sXML)
-	{
+	public function getArray($sXML){
 		$moXml = @simplexml_load_string($sXML);
-		if ($moXml === false)
+		if ($moXml === false){
 			return null;
-		else
-		{
+		}else{
 			$sRet = $this->xml2array($moXml);
 			unset($moXml);
 			return $sRet;
@@ -140,11 +131,9 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @return string
 	 * @see IXmlJsonConverArray::getStrPacket()
 	 */
-	public function getStrPacket($aArr)
-	{
+	public function getStrPacket($aArr){
 		static $sBase = null;
-		if (empty($sBase))
-		{
+		if (empty($sBase)){
 			$aTmp = array();
 			$aTmp[] = '<?xml version=\'1.0\' encoding=\'{@charset}\'?>';
 			$aTmp[] = $this->O("\n");
@@ -173,8 +162,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 *  @access public
 	 *  @see IXmlJsonConverArray::setShowFormat()
 	 */
-	public function setShowFormat($bOpen=true)
-	{
+	public function setShowFormat($bOpen=true){
 		if ($bOpen === true)
 			$this->mbOutputFormat = true;
 		else
@@ -206,8 +194,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
      *
      * @access private
 	 */
-	private function xml2array(SimpleXMLElement $xml,$attributesKey=null,$childrenKey=null,$valueKey=null)
-	{
+	private function xml2array(SimpleXMLElement $xml,$attributesKey=null,$childrenKey=null,$valueKey=null){
 		if($childrenKey && !is_string($childrenKey))
 			$childrenKey = '@children';
 		if($attributesKey && !is_string($attributesKey))
@@ -217,8 +204,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 
 		$aRet = array(); //保存用于返回的数组
 		$_content = trim((string)$xml);
-		if (!empty($_content))
-		{	//此处为叶子节点的处理
+		if (!empty($_content)){	//此处为叶子节点的处理
 // 			$name = $xml->getName();
 			if($valueKey)
 				$aRet[$valueKey] = $_content; //正常情况下不应该跑到这里
@@ -227,35 +213,34 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 		}
 
 		$children = array();
-		$bFirst = true;
-		foreach($xml->children() as $sElementName => $oChild)
-		{
+		foreach($xml->children() as $sElementName => $oChild){
 			$sElementName = strtolower($sElementName);//强制枝干名称转换为小写
 			$aValue = self::xml2array($oChild, $attributesKey, $childrenKey,$valueKey);
-			if(isset($children[$sElementName]))
-			{
-				if(is_array($children[$sElementName]))
-				{
-					if($bFirst)
-					{
-						$temp = $children[$sElementName];
-						unset($children[$sElementName]);
-						$children[$sElementName][] = $temp;
-						$bFirst=false;
+			if(isset($children[$sElementName])){ //发现存在兄弟节点
+				if(isset($children[$sElementName]['A'])){ //属性节点的处理
+					$temp = $children[$sElementName];
+					unset($children[$sElementName]);
+					$children[$sElementName][] = $temp;
+				}elseif (isset($children[$sElementName]['C'])){ //叶子节点的兄弟节点处理
+					if (is_string($children[$sElementName]['C'])){
+						$sTmp = $children[$sElementName]['C'];
+						$children[$sElementName]['C'] = array();
+						$children[$sElementName]['C'][] = $sTmp;
+						unset($sTmp);
 					}
+				}
+				if (isset($children[$sElementName]['C']) && is_array($children[$sElementName]['C']))
+					$children[$sElementName]['C'][] = $aValue['C']; //增加叶子内容节点
+				else //增加属性节点
 					$children[$sElementName][] = $aValue;
-				}else
-					$children[$sElementName] = array($children[$sElementName],$aValue);
-			}
-			else
+			}else //非兄弟节点的赋值处理
 				$children[$sElementName] = $aValue;
 		}
-		if($children)
-		{
+		if($children){
 			if($childrenKey){
 				$aRet[$childrenKey] = $children;
-			}
-			else{$aRet = array_merge($aRet,$children);
+			}else{
+				$aRet = array_merge($aRet,$children);
 			}
 		}
 
@@ -263,13 +248,10 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 		$attributes = array();
 		foreach($xml->attributes() as $sKey=>$sValue)
 			$attributes[$sKey] = $this->decodeCharset($sValue);//属性内容编码强制转换
-
-		if($attributes)
-		{
-			if($attributesKey)
+		if($attributes){
+			if($attributesKey){
 				$aRet[$attributesKey] = $attributes;
-			else
-			{
+			}else{
 				if (empty($aRet))
 					$aRet = array('A'=>$attributes);
 				elseif (is_array($aRet))
@@ -286,8 +268,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @param array() $aArr xml的属性数组
 	 * @return string
 	 */
-	private function getAttribStr($aArr)
-	{
+	private function getAttribStr($aArr){
 		$aBuf = array();
 		foreach ($aArr as $sKey => $sVal)
 			array_push($aBuf, $sKey, '=\'', $this->encodeCharset($sVal), '\' ');
@@ -300,12 +281,10 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 	 * @param int $iLevel 递归的时返回当前层级
 	 * @return string
 	 */
-	private function array2xml(& $aArray, $iLevel=1)
-	{
-		if (empty($aArray))
+	private function array2xml(& $aArray, $iLevel=1){
+		if (empty($aArray)){
 			return null;
-		else
-		{
+		}else{
 			if (array_key_exists('C',$aArray))
 				return array('val'=>$this->encodeCharset($aArray['C']),
 						     'type'=>'c'
@@ -313,30 +292,25 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 		}
 
 		$aBuf = array();
-		foreach ($aArray as $sTag => & $aVal)
-		{
-			if ('A' == $sTag)//不处理这个Tag
+		foreach ($aArray as $sTag => & $aVal){
+			if ('A' == $sTag){//不处理这个Tag
 				continue;
-			elseif (isset($aVal[0]))
-			{	//探测到当前层有同名tag节点
+			}elseif (isset($aVal[0])){	//探测到当前层有同名tag节点
 				$aLeaf = array();
-				foreach ($aVal as & $aNode)
-				{
+				foreach ($aVal as & $aNode){
 					array_push($aLeaf, $this->O(str_repeat(self::PREFIX, $iLevel)), '<', strtolower($sTag)); //构建tag头
 					//如果存在属性则构建属性
 					if (array_key_exists('A', $aNode))
 						$aLeaf[] = ' '. $this->getAttribStr($aNode['A']);
 
 					$aSubNode = $this->array2xml($aNode, $iLevel+1);
-					if (empty($aSubNode))
+					if (empty($aSubNode)){
 						array_push($aLeaf, '/>', $this->O("\n"));//空节点
-					else
-					{
+					}else{
 						$aLeaf[] = '>';
-						if ($aSubNode['type'] == 'c')
+						if ($aSubNode['type'] == 'c'){
 							$aLeaf[] = $aSubNode['val'];
-						else
-						{
+						}else{
 							array_push($aLeaf, $this->O("\n"), $aSubNode['val'], $this->O("\n"));//关闭节点
 							$aLeaf[] = $this->O(str_repeat(self::PREFIX, $iLevel));
 						}
@@ -346,9 +320,7 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 				}
 				$aBuf[] = implode('', $aLeaf);
 				unset($aLeaf);
-			}
-			else
-			{	//处理同层兄弟节点
+			}else{	//处理同层兄弟节点
 				$aLeaf = array();
 				array_push($aLeaf, $this->O(str_repeat(self::PREFIX, $iLevel)), '<', strtolower($sTag)); //构建tag头
 				//如果存在属性则构建属性
@@ -356,15 +328,13 @@ final class CXmlArrayConver implements IXmlJsonConverArray
 					$aLeaf[] = ' '. $this->getAttribStr($aVal['A']);
 
 				$aSubNode = $this->array2xml($aVal, $iLevel+1); //递归
-				if (empty($aSubNode))
+				if (empty($aSubNode)){
 					array_push($aLeaf, '/>', $this->O("\n"));//空节点
-				else
-				{
+				}else{
 					$aLeaf[] = '>';
-					if ($aSubNode['type'] == 'c')
+					if ($aSubNode['type'] == 'c'){
 						$aLeaf[] = $aSubNode['val'];
-					else
-					{
+					}else{
 						array_push($aLeaf, $this->O("\n"), $aSubNode['val']);//关闭节点
 						$aLeaf[] = $this->O(str_repeat(self::PREFIX, $iLevel));
 					}

@@ -49,8 +49,7 @@ abstract class CExtModule
 	function __construct()
 	{
 		//TODO 需要完善日志（应该记录一些什么内容？）
-// 		list($usec, $sec) = explode(' ', microtime());
-// 		$this->fBeginTime = floatval($usec) + floatval($sec); //启动时间保存
+// 		$this->fBeginTime = microtime(true); //启动时间保存
 // 		$this->sBeginDatetime = date('Y-m-d H:i:s'); //记录开始时间
 		//上面的代码暂时不用
 

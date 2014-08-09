@@ -36,10 +36,10 @@
 <div class="expressArea"><!--信息表达区-->
 	<header>checksum的生成算法</header>
 	<section>
-		<p>checksum的value属性成算法为：md5(package + class + unix_timestemp + 公钥)；其中md5()使用32位长度，package为协议中的包名；class为协议中的API服务逻辑名；unix_timestemp是Unix新纪元(格林威治时间1970年1月1日00:00:00)到当前时间的秒数(php:time() | java:System.currentTimeMillis()/1000 | JavaScript:Math.round(new Date().getTime()/1000))；公钥向管理员申请。</p>
-		<p>xml传输协议下，checksum节点形式如下: &lt;checksum value="校验码md5(32位)" unix_timestemp="1375835368"/&gt;</p>
-		<p>json传输协议下，checksum节点形式如下: "checksum":{"A":{"value":"校验码md5(32位)", "unix_timestemp":1375835368}}</p>
-		<p>Get请求方式下，checksum节点形式如下: checksum.value=校验码md5(32位)&amp;checksum.unix_timestemp=1375835368}}</p>
+		<p>checksum的value属性成算法为：md5(package + class + unix_timestamp + 公钥)；其中md5()使用32位长度，package为协议中的包名；class为协议中的API服务逻辑名；unix_timestamp是Unix新纪元(格林威治时间1970年1月1日00:00:00)到当前时间的秒数(php:time() | java:System.currentTimeMillis()/1000 | JavaScript:Math.round(new Date().getTime()/1000))；公钥向管理员申请。</p>
+		<p>xml传输协议下，checksum节点形式如下: &lt;checksum value="校验码md5(32位)" unix_timestamp="1375835368"/&gt;</p>
+		<p>json传输协议下，checksum节点形式如下: "checksum":{"A":{"value":"校验码md5(32位)", "unix_timestamp":1375835368}}</p>
+		<p>Get请求方式下，checksum节点形式如下: checksum.value=校验码md5(32位)&amp;checksum.unix_timestamp=1375835368}}</p>
 		<p><strong>备注:</strong>如果本地时间与服务器时差超出1小时，则可以调用接口 Package: system.public&nbsp;&nbsp;&nbsp;Class : GET_TIME_DIFFERENCE&nbsp;&nbsp;来获得与服务器之间的时差值（访问这个接口时不需要提供checksum校验节点）。</p>
 	</section>
 </div>
@@ -49,9 +49,9 @@
 	<section>
 		<p>当API接口的服务协议中，入口协议只有一层结构，且不存在同名兄弟节点，这种情况下可通过HTTP的GET方式直接提交请求字符串，这样接口的调用访问会变得异常的简单。但对于大数据量的提交，依然建议使用xml或json的数据协议通过HTTP的POST方式来进行传输，这样可以用到浏览器数据压缩传输的功能，能提高通信效率且更加安全。</p>
 		<p>GET字符串参数与xml结构数据的对应关系：1、属性的表示方式为 tag.arrtib=....；2、内容的表示方式为 tag2=....；由此按照这个结构将每个节点用"&amp;"进行连接，送到url地址中。</p>
-		<p>使用方式(以xml结构示例)：&lt;root&gt;&lt;package&gt;test.user&lt;/package&gt;&lt;class&gt;GET_LIST&lt;/class&gt;&lt;id&gt;x012345&lt;/id&gt;&lt;info page="1" pagesize="20"/&gt;&lt;checksum value="wwwwwwww" unix_timestemp="unix时间戳" /&gt;&lt;/root&gt;</p>
+		<p>使用方式(以xml结构示例)：&lt;root&gt;&lt;package&gt;test.user&lt;/package&gt;&lt;class&gt;GET_LIST&lt;/class&gt;&lt;id&gt;x012345&lt;/id&gt;&lt;info page="1" pagesize="20"/&gt;&lt;checksum value="wwwwwwww" unix_timestamp="unix时间戳" /&gt;&lt;/root&gt;</p>
 		<p>如上所述的xml入口协议规则，对应的GET字符串为：<br />
-		?package=test.user&amp;class=GET_LIST&amp;id=x012345&amp;info.page=1&amp;info.pagesize=20&amp;checksum.value=wwwwwwww&amp;checksum.unix_timestemp=unix时间戳 </p>
+		?package=test.user&amp;class=GET_LIST&amp;id=x012345&amp;info.page=1&amp;info.pagesize=20&amp;checksum.value=wwwwwwww&amp;checksum.unix_timestamp=unix时间戳 </p>
 		<p><strong>注意 :</strong> "="后面的值，必须依照 [RFC1738] 规范对参数做urlencode编码，且最终的Url的总长度不可超过2048btye。</p>
 	</section>
 </div>

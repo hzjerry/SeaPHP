@@ -82,7 +82,7 @@ final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView
 		$aXml = array();
 		$aXml['name'] = parent::createNode('待查询的用户名字，测试一下这个备注名称会很长很长，长到超出输入框的长度，是否会被截断[max:32]');
 		$aXml['userid'] = parent::createNode('用户ID[max:32]');
-		$aXml['Family_Members'] = parent::createNode(null,
+		$aXml['Family'] = parent::createNode(null,
 				array('mother'=>'妈妈名字[max:16]',
 					  'father'=>'爸爸名字[max:16]',
 					  'brother'=>'兄弟名字[max:16]'));

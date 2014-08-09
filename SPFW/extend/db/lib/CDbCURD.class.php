@@ -7,6 +7,7 @@
  * @see
  * <li>2013-05-07 jerryli 创立</li>
  * <li>2013-12-19 jerryli left_join(),from() 增加了强制指定索引</li>
+ * <li>2014-06-22 jerryli 增加了UNID()函数，生成唯一识别号用于insert时的id字段(用于bigint字段)</li>
  */
 class CDbCURD
 {
@@ -105,6 +106,19 @@ class CDbCURD
 	}
 
 	/**
+	 * 生成唯一识别号序列<br />
+	 * 备注:时间从2014-01-01日开始计算的unix时间戳<br/>
+	 * 精度：100ns，并在末尾加3位随机数
+	 * @return string bigint型字符串，最大长度2^64
+	 * @access public
+	 * @static
+	 */
+	static public function UNID()
+	{
+		return join(array(floor((microtime(true)-1387584000)*10000), rand(100,999)));
+	}
+
+	/**
 	 * 清除链式操作生成的子句缓存
 	 * @return void
 	 * @access protected
@@ -189,7 +203,7 @@ class CDbCURD
 	/**
 	 * 操作的表名<br />
 	 * 用于: SELECT | DELECT | UPDATE 操作
-	 * @param string $sTableName	表名
+	 * @param string $sTableName	表名(会自动添加表前缀)
 	 * @param string $sByname		表别名(默认为null;在left_join()子句中会使用)
 	 * @param string $sIndexName	强制使用指定的索引(默认null)
 	 * @return CDbCURD
@@ -217,7 +231,7 @@ class CDbCURD
 	 * 因为$sByname就是left_join()中$sLeftByname需要使用的参数
 	 * 用于: SELECT | DELECT | UPDATE 操作
 	 * @param string $sLeftByname 主表别名
-	 * @param string $sJoinTable 被关联表
+	 * @param string $sJoinTable 被关联表(会自动添加表前缀)
 	 * @param string $sJoinByname 被关联表别名(''|null|别名)
 	 * @param string|array $aJoinId 关联字段 'field' 或 array('left_field', 'join_field')
 	 * @param string $sIndexName 强制使用指定的索引(默认null)

@@ -124,6 +124,8 @@ class CWebServiceClient extends CExtModule{
 			}else{
 				self::$_iCalibrate = 0;
 			}
+			if ('file_get_contents' === $aCfg['posthttp_comm_func']) //切换通信函数
+				self::$_oPost->setCommFunc('file_get_contents');
 			unset($aCfg);
 		}
 	}

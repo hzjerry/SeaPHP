@@ -616,7 +616,7 @@ final class CPostHttp
 	}
 
 	/**
-	 * 执行GET操作，送出设定好的POST数据
+	 * 执行GET操作
 	 * @return bool
 	 * @access public
 	 * */

@@ -9,7 +9,7 @@ final class CErrThrow
 {
 	/**
 	 * 抛出系统错误信息,并终止程序运行<br />
-	 * 注意：必须在系统奔溃时使用，否则函数打印出的函数堆栈信息有安全隐患
+	 * 注意：必须在系统崩溃时使用，否则函数打印出的函数堆栈信息有安全隐患
 	 * @param string $sErrCode 错误代号
 	 * @param string $sMsg 错误提示信息
 	 * @return null;

@@ -28,5 +28,9 @@ return array
 	array('package'=>'extend.sms.runtime',	'file'=>'CSMS.class.php'),
 'CWebServiceClient'=> //SeaPHP WebService 专用的Client 操作对象
 	array('package'=>'extend.webservice_client.runtime',	'file'=>'CWebServiceClient.class.php'),
+'CWeiXinHelper'=> //微信向导服务类(专用于处理微信的请求响应)
+	array('package'=>'extend.weixin_service.runtime',	'file'=>'CWeiXinHelper.class.php'),
+'CWeiXinTools'=> //微信工具类
+	array('package'=>'extend.weixin_service.lib',	'file'=>'CWeiXinTools.class.php'),
 );
 ?>

@@ -2,7 +2,9 @@
 /**
  * 数据库操作对象<br/>
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20130430
+ * @version
+ * <li>V0.20130430 create</li>
+ * <li>V0.20140814 update 修改了日志输出格式</li>
  * @package SPFW.extend.db.runtime
  * @final
  * @example 建立数据库对象
@@ -150,7 +152,7 @@ final class CDB extends CExtModule
 		{	//是否记录日志，由environment.cfg.php中的write_log控制
 			$aBuf = array();
 			foreach ($this->moDBL->getSqlLog() as $aNode)
-				$aBuf[] = implode('', array($aNode['time'], ' ms,', "\t", $aNode['sql']));
+				$aBuf[] = implode('', array(date('H:i:s'), "\t", $aNode['time'], "\t", $aNode['sql']));
 			if (count($aBuf) > 0)
 				$this->setSaveLogData($aBuf); //输出SQL日志
 			unset($aBuf);

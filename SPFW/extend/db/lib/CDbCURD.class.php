@@ -2,15 +2,15 @@
 /**
  * 数据库操作层（CURD创建更新读取删除）<br/>
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20131219
+ * @version V0.20140923
  * @package SPFW.extend.db.lib
  * @see
  * <li>2013-05-07 jerryli 创立</li>
  * <li>2013-12-19 jerryli left_join(),from() 增加了强制指定索引</li>
  * <li>2014-06-22 jerryli 增加了UNID()函数，生成唯一识别号用于insert时的id字段(用于bigint字段)</li>
+ * <li>2014-09-23 jerryli 修改了UNID()函数，末尾改为4位随机数，杜绝高频插入时出现主键相同的问题</li>
  */
-class CDbCURD
-{
+class CDbCURD{
 	/**
 	 * 数据库操作驱动
 	 * @var CDbDriver
@@ -70,20 +70,17 @@ class CDbCURD
 	 * @var string
 	 */
 	private $msLimit = null;
-
 	/**
 	 * 构造函数
 	 * @param CDbDriver $oDBL 数据库链接驱动层对象
 	 * @param string $sPrefix 表前缀
 	 * @param string $sTableUpperLower 表名强制大小写 [upper:强制大写|lower:强制小写|intact:保持原样]
 	 */
-	public function __construct($oDBL, $sPrefix, $sTableUpperLower)
-	{
+	public function __construct($oDBL, $sPrefix, $sTableUpperLower){
 		$this->moDBO = $oDBL;
 		$this->msPrefix = $sPrefix;
 		$this->msTableUpperLower = $sTableUpperLower;
 	}
-
 	/**
 	 * 安全的参数过滤处理（尽可能大量使用这个函数）<br />
 	 * 备注:本函数能够抵御SQL注入攻击的处理；如输入值为数字，则保持原样，如果输入的为字符串则输出时会加入''
@@ -94,8 +91,7 @@ class CDbCURD
 	 * @example
 	 * 'WHERE username='. $this->S('xyz') .'AND age='. $this->S(32);
 	 */
-	static public function S($Val)
-	{
+	static public function S($Val){
 		static $aRep = array('\''=> '\'\'', '\\'=>'\\\\');
 		if (is_int($Val) || is_float($Val))
 			return $Val .' ';
@@ -104,27 +100,23 @@ class CDbCURD
 		else
 			return '\'\' ';
 	}
-
 	/**
 	 * 生成唯一识别号序列<br />
 	 * 备注:时间从2014-01-01日开始计算的unix时间戳<br/>
-	 * 精度：100ns，并在末尾加3位随机数
+	 * 精度：100ns，并在末尾加4位随机数
 	 * @return string bigint型字符串，最大长度2^64
 	 * @access public
 	 * @static
 	 */
-	static public function UNID()
-	{
-		return join(array(floor((microtime(true)-1387584000)*10000), rand(100,999)));
+	static public function UNID(){
+		return join(array(floor((microtime(true)-1387584000)*10000), rand(1000,9999)));
 	}
-
 	/**
 	 * 清除链式操作生成的子句缓存
 	 * @return void
 	 * @access protected
 	 */
-	protected function clear()
-	{
+	protected function clear(){
 		$this->maFields = array();
 		$this->maFrom = array();
 		$this->msWhere = null;
@@ -134,25 +126,21 @@ class CDbCURD
 		$this->maParam = array();
 		$this->msLimit = null;
 	}
-
 	/**
 	 * 打印SQL执行的历史信息(必须在SQL执行以后使用)
 	 * @return void
 	 * @access private
 	 */
-	public function showHistory()
-	{
+	public function showHistory(){
 		$this->moDBO->showSqlHistory();
 	}
-
 	/**
 	 * 抛出错误信息，并终止程序
 	 * @param unknown_type $sMsg
 	 * @return void
 	 * @access protected
 	 */
-	protected function throwErr($sMsg)
-	{
+	protected function throwErr($sMsg){
 		echo '<blockquote>',
 			'<font face="arial" size="2" color="ff0000">',
 			'<strong>SQL Parse error: </strong>',
@@ -162,7 +150,6 @@ class CDbCURD
 			implode('<br />', dbg::TRACE());
 		exit(0);
 	}
-
 	/**
 	 * 返回带表前缀的表名（尽可能大量使用这个函数）<br />
 	 * 备注：内置表名强制大小写的处理
@@ -170,8 +157,7 @@ class CDbCURD
 	 * @return string
 	 * @access public
 	 */
-	public function TabN($sTableName)
-	{
+	public function TabN($sTableName){
 		if (!empty($this->msPrefix))
 			$sTableName = $this->msPrefix . $sTableName;
 
@@ -183,7 +169,6 @@ class CDbCURD
 
 		return $sTableName;
 	}
-
 	/**
 	 * 设置检索字段<br />
 	 * 用于: SELECT | INSERT(批量插入) 操作
@@ -191,15 +176,13 @@ class CDbCURD
 	 * @return CDbCURD
 	 * @access public
 	 */
-	public function fields($f)
-	{
+	public function fields($f){
 		if (is_array($f))
 			$this->maFields = $f;
 		elseif (is_string($f))
 			$this->maFields = array($f);
 		return $this;
 	}
-
 	/**
 	 * 操作的表名<br />
 	 * 用于: SELECT | DELECT | UPDATE 操作
@@ -209,8 +192,7 @@ class CDbCURD
 	 * @return CDbCURD
 	 * @access public
 	 */
-	public function from($sTableName, $sByname=null, $sIndexName=null)
-	{
+	public function from($sTableName, $sByname=null, $sIndexName=null){
 		unset($this->maFrom);
 		$this->maFrom = array();
 		if (empty($sByname)) //不存在别名
@@ -224,7 +206,6 @@ class CDbCURD
 
 		return $this;
 	}
-
 	/**
 	 * 表左关联关系添加<br/>
 	 * 注意:必须在本函数前执行from($sTableName, $sByname),且$sByname参数必须设置。
@@ -238,16 +219,12 @@ class CDbCURD
 	 * @return CDbCURD
 	 * @access public
 	 */
-	public function left_join($sLeftByname, $sJoinTable, $sJoinByname, $aJoinId, $sIndexName=null)
-	{
-		if (empty($sLeftByname))
-		{	//别名不能为空
+	public function left_join($sLeftByname, $sJoinTable, $sJoinByname, $aJoinId, $sIndexName=null){
+		if (empty($sLeftByname)){	//别名不能为空
 			echo '<br />The left_join() $sLeftByname is missing.',
 				 implode('<br/>', dbg::TRACE());
 			exit(0);
-		}
-		elseif (count($this->maFrom) == 0)
-		{	//必须使用from()并设置别名
+		}elseif (count($this->maFrom) == 0){	//必须使用from()并设置别名
 			echo '<br />From () function must be used, and set the $sByname.',
 			implode('<br/>', dbg::TRACE());
 			exit(0);
@@ -278,7 +255,6 @@ class CDbCURD
 		array_push($this->maFrom, implode(' ', $aBuf));
 		return $this;
 	}
-
 	/**
 	 * 设置WHERE条件<br/>
 	 * 用于: SELECT | DELECT | UPDATE 操作
@@ -292,12 +268,10 @@ class CDbCURD
 	 * @example
 	 * where('id={@id} AND username={@uname}', array('{@id}'=>1, '{@uname}'=>'test'))
 	 */
-	public function where($sTemplate, $aSafeReplace=null)
-	{
-		if (is_null($aSafeReplace))
+	public function where($sTemplate, $aSafeReplace=null){
+		if (is_null($aSafeReplace)){
 			$this->msWhere = ' WHERE '. $sTemplate;
-		else
-		{
+		}else{
 			//对$aReplace中的replace value值做转换
 			foreach ($aSafeReplace as $sKey => &$sVal)
 				$sVal = self::S($sVal);
@@ -305,32 +279,27 @@ class CDbCURD
 		}
 		return $this;
 	}
-
 	/**
 	 * 获取当前链式存储区中的Where子句内容<br />
 	 * 注意: 不包含WHERE前缀操作符，只含有条件内容
 	 * return string | null
 	 */
-	public function getWhere()
-	{
+	public function getWhere(){
 		if (!is_null($this->msWhere))
 			return substr($this->msWhere, 7);
 		else
 			return null;
 	}
-
 	/**
 	 * 获取当前链式存储区中SELECT子句的Fields字段数组<br />
 	 * return array | null
 	 */
-	public function getFields()
-	{
+	public function getFields(){
 		if (!is_null($this->maFields) && count($this->maFields) > 0)
 			return $this->maFields;
 		else
 			return null;
 	}
-
 	/**
 	 * 设定SQL参数<br />
 	 * <strong>注意:</strong> 不会对'value1'做安全处理，'value1'请自行使用CDbCURD::S()做处理<br />
@@ -342,12 +311,10 @@ class CDbCURD
 	 * @example
 	 * param(array('ip'=>'INET_ATON('. CDbCURD::S('129.168.1.23') .')'));
 	 */
-	public function param($aArr)
-	{
+	public function param($aArr){
 		$this->maParam = $aArr;
 		return $this;
 	}
-
 	/**
 	 * 设置ORDER BY排序子句<br/>
 	 * 用于: SELECT | UPDATE操作<br/>
@@ -358,12 +325,10 @@ class CDbCURD
 	 * @example
 	 * orderby('field1 DESC, field2 DESC')
 	 */
-	public function order($sOrderBy)
-	{
+	public function order($sOrderBy){
 		$this->msOrder = ' ORDER BY '. $sOrderBy;
 		return $this;
 	}
-
 	/**
 	 * 设置GROUP BY子句<br/>
 	 * 用于: SELECT 操作
@@ -371,12 +336,10 @@ class CDbCURD
 	 * @return CDbCURD
 	 * @access public
 	 */
-	public function group($sFields)
-	{
+	public function group($sFields){
 		$this->msGroup = ' GROUP BY '. $sFields;
 		return $this;
 	}
-
 	/**
 	 * 设置HAVING子句<br/>
 	 * 用于: SELECT 操作
@@ -389,13 +352,10 @@ class CDbCURD
 	 * @example
 	 * having('id={@id} AND username={@uname}', array('{@id}'=>1, '{@uname}'=>'test'))
 	 */
-	public function having($sTemplate, $aParam=null)
-	{
-
-		if (is_null($aParam))
+	public function having($sTemplate, $aParam=null){
+		if (is_null($aParam)){
 			$this->msHaving = ' HAVING '. $sTemplate;
-		else
-		{
+		}else{
 			//对param中的replace value值做转换
 			foreach ($aParam as $sKey => $sVal)
 				$aParam[$sKey] = self::S($sVal);
@@ -403,7 +363,6 @@ class CDbCURD
 		}
 		return $this;
 	}
-
 	/**
 	 * LIMIT子句设定返回集数量
 	 * @param int $iStart 起始位置 &gt;=0
@@ -413,8 +372,7 @@ class CDbCURD
 	 * limit(0, 10); //从0条开始取10条记录<br />
 	 * limit(10); //取前10条记录
 	 */
-	public function limit($iStart, $iCnt=null)
-	{
+	public function limit($iStart, $iCnt=null){
 		if (is_null($iCnt))
 			$this->msLimit = ' LIMIT '. intval($iStart);
 		else
@@ -433,8 +391,7 @@ class CDbCURD
 	 *  	->where('id={@id}AND name={@name}', array('{@id}'=>1, '{@name}'=>'gu\'est'))<br />
 	 *  	->delete()
 	 */
-	public function delete()
-	{
+	public function delete(){
 		static $sTemplate = 'DELETE FROM {@tag_table}{@tag_where}{@tag_orderby}{@tag_limit}';
 
 		$aParam = array();
@@ -456,7 +413,6 @@ class CDbCURD
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->exec($sSql);;
 	}
-
 	/**
 	 * 删除操作（必须通过链式操作设置from()与param()）<br/>
 	 * 返回: 受影响的记录条数
@@ -471,8 +427,7 @@ class CDbCURD
 	 *		->limit(1)<br />
 	 *  	->update()
 	 */
-	public function update()
-	{
+	public function update(){
 		static $sTemplate = 'UPDATE {@tag_table}{@tag_set}{@tag_where}{@tag_orderby}{@tag_limit}';
 
 		$aParam = array();
@@ -482,8 +437,7 @@ class CDbCURD
 			$this->throwErr('链式访问时缺少from()参数项');
 
 		//加入UPDATE的SET子句
-		if (is_array($this->maParam) && count($this->maParam) > 0)
-		{
+		if (is_array($this->maParam) && count($this->maParam) > 0){
 			$aTmp = array();
 			foreach ($this->maParam as $sField => $Val)
 				$aTmp[] = $sField .'='. $Val; //不做安全处理
@@ -505,7 +459,6 @@ class CDbCURD
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->exec($sSql);
 	}
-
 	/**
 	 * insert单条插入操作（必须通过链式操作设置from()与param()）<br/>
 	 * 返回: 受影响的记录条数
@@ -518,8 +471,7 @@ class CDbCURD
 	 *  	->param(array('val_text'=>'insert() \'access\''))<br />
 	 *  	->insert()
 	 */
-	public function insert($sReturnType='affect')
-	{
+	public function insert($sReturnType='affect'){
 		static $sTemplate = 'INSERT INTO {@tag_table} ({@tag_col}) VALUES ({@tag_value})';
 
 		$aParam = array();
@@ -529,8 +481,7 @@ class CDbCURD
 			$this->throwErr('链式访问时缺少from()或 设置的表数量超过1个');
 
 		//加入字段与值的对应关系
-		if (is_array($this->maParam) && count($this->maParam) > 0)
-		{
+		if (is_array($this->maParam) && count($this->maParam) > 0){
 			$aCol = array();
 			$aVal = array();
 			foreach ($this->maParam as $sField => $Val)
@@ -541,8 +492,7 @@ class CDbCURD
 			$aParam['{@tag_col}'] = implode(', ', $aCol);
 			$aParam['{@tag_value}'] = trim(implode(', ', $aVal));
 			unset($aCol, $aVal);
-		}
-		else//SQL语句未执行，缺少必要项
+		}else//SQL语句未执行，缺少必要项
 			$this->throwErr('链式访问时缺少param()参数项');
 
 		$sSql = strtr($sTemplate, $aParam);
@@ -554,7 +504,6 @@ class CDbCURD
 		else
 			return $this->moDBO->exec($sSql);
 	}
-
 	/**
 	 * insert批量插入操作（必须通过链式操作设置from()与fields()）<br/>
 	 * 返回: 受影响的记录条数
@@ -573,8 +522,7 @@ class CDbCURD
 	 *  	->fields(array('val_text'))<br />
 	 *  	->insertMulti($aData);
 	 */
-	public function insertMulti($aInData)
-	{
+	public function insertMulti($aInData){
 		static $sTemplate = 'INSERT INTO {@tag_table} ({@tag_col}) VALUES {@tag_values}';
 
 		$aParam = array();
@@ -584,25 +532,21 @@ class CDbCURD
 			$this->throwErr('链式访问时缺少from()或 设置的表数量超过1个');
 
 		//加入字段与值的对应关系
-		if (is_array($this->maFields) && count($this->maFields) > 0)
-		{
+		if (is_array($this->maFields) && count($this->maFields) > 0){
 			$aCol = array();
 			foreach ($this->maFields as $sField)
 				$aCol[] = $sField;
 			$aParam['{@tag_col}'] = implode(', ', $aCol);
 			unset($aCol);
-		}
-		else//SQL语句未执行，缺少必要项
+		}else//SQL语句未执行，缺少必要项
 			$this->throwErr('链式访问时缺少fields()参数项');
 
 		//加入批量插入的值
-		if (count($aInData) > 0)
-		{
+		if (count($aInData) > 0){
 			$iRow = count($aInData);
 			$iFieldCnt = count($this->maFields);
 			$aRow = array();
-			for($i=0; $i<$iRow; $i++)
-			{
+			for($i=0; $i<$iRow; $i++){
 				$aTmp = array();
 				for($if=0; $if<$iFieldCnt; $if++)
 					$aTmp[] = $aInData[$i][$if];//不做安全处理
@@ -612,8 +556,7 @@ class CDbCURD
 			unset($aTmp);
 			$aParam['{@tag_values}'] = implode(', ', $aRow) .';';
 			unset($aRow);
-		}
-		else
+		}else
 			$this->throwErr('$aData至少包含一条数据');
 
 		$sSql = strtr($sTemplate, $aParam);
@@ -621,7 +564,6 @@ class CDbCURD
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->exec($sSql);
 	}
-
 	/**
 	 * SELECT操作（使用链式操作时必须设置from()与fields()）<br/>
 	 * 使用: 如果使用链式操作，请不要设置$sSql参数。当设置了$sSql参数将以此SQL语句为准，链式操作无效。<br/>
@@ -642,12 +584,10 @@ class CDbCURD
 	 *  	->limit(5) <br />
 	 *  	->select();
 	 */
-	public function select($bDBWR=null, $sSql=null)
-	{
+	public function select($bDBWR=null, $sSql=null){
 		static $sTemplate = 'SELECT {@tag_fields} FROM {@tag_table}{@tag_where}{@tag_groupby}{@tag_having}{@tag_orderby}{@tag_limit}';
 
-		if (empty($sSql))
-		{
+		if (empty($sSql)){
 			$aParam = array();
 			//加入SELECT输出字段
 			if (is_array($this->maFields) && count($this->maFields) >= 1)
@@ -678,15 +618,13 @@ class CDbCURD
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->query($sSql, $bDBWR);
 	}
-
 	/**
 	 * 根据链式操作，生成SQL语句SELECT专用（使用链式操作时必须设置from()）<br />
 	 * (专用于高效的SELECT语句) 无视limit()操作
 	 * @return string
 	 * @access private
 	 */
-	private function efficientSelect()
-	{
+	private function efficientSelect(){
 		static $sTemplate = '{@tag_fields}FROM {@tag_table}{@tag_where}{@tag_groupby}{@tag_having}{@tag_orderby}';
 
 		$aParam = array();
@@ -714,7 +652,6 @@ class CDbCURD
 		unset($aParam);
 		return $sSql;
 	}
-
 	/**
 	 * SELECT操作，获取第一个字段的第一个值[高效能操作]（使用链式操作时必须设置from()与fields()）<br/>
 	 * 使用: 如果使用链式操作，请不要设置$sSql参数。当设置了$sSql参数将以此SQL语句为准，链式操作无效。<br/>
@@ -742,15 +679,12 @@ class CDbCURD
 	 *  -----------------<br />
 	 *  $odb->db()->selectOne(null, 'FROM '.$odb->db()->TabN('test'). ' WHERE id_num=2')
 	 */
-	public function selectOne($bDBWR=null, $sSql=null)
-	{
+	public function selectOne($bDBWR=null, $sSql=null){
 		$bGetCount = false;
-
 		if (empty($sSql)) //$sSql不存在，使用链式处理
 			$sSql = $this->efficientSelect();
 		//如果不存在SELECT Fields内容，则自动加入SELECT COUNT(0)
-		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
-		{
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0){
 			$sSql = 'SELECT COUNT(0) '. trim($sSql);
 			$bGetCount = true;
 		}
@@ -760,7 +694,6 @@ class CDbCURD
 		else
 			return $this->moDBO->queryOne($sSql, $bDBWR);
 	}
-
 	/**
 	 * SELECT操作，统计本条件的记录集条数（使用链式操作时必须设置from()）<br/>
 	 * 使用: 如果使用链式操作，请不要设置$sSql参数。当设置了$sSql参数将以此SQL语句为准，链式操作无效。<br/>
@@ -787,11 +720,9 @@ class CDbCURD
 	 *  -----------------<br />
 	 *  $odb->db()->selectRowCnt(null, 'FROM '.$odb->db()->TabN('test'). ' WHERE id_num=2')
 	 */
-	public function selectRowCnt($bDBWR=null, $sSql=null)
-	{
+	public function selectRowCnt($bDBWR=null, $sSql=null){
 		if (empty($sSql)) //$sSql不存在，使用链式处理
 			$sSql = $this->efficientSelect();
-
 		//如果不存在SELECT Fields内容，则自动加入SELECT COUNT(0)
 		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			$sSql = 'SELECT COUNT(0) '. trim($sSql);
@@ -799,7 +730,6 @@ class CDbCURD
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->queryOne($sSql, $bDBWR);
 	}
-
 	/**
 	 * SELECT操作，获取第一个字段的整个记录集[高效能操作]（使用链式操作时必须设置from()与fields()）<br/>
 	 * 使用: 如果使用链式操作，请不要设置$sSql参数。当设置了$sSql参数将以此SQL语句为准，链式操作无效。<br/>
@@ -822,22 +752,17 @@ class CDbCURD
 	 *  -----------------<br />
 	 *  $odb->db()->selectFirstCol(null, 'SELECT id_num, val_text FROM '.$odb->db()->TabN('test'). ' WHERE id_num=3')
 	 */
-	public function selectFirstCol($bDBWR=null, $sSql=null)
-	{
-		if (empty($sSql)) //$sSql不存在，使用链式处理
-		{
+	public function selectFirstCol($bDBWR=null, $sSql=null){
+		if (empty($sSql)){ //$sSql不存在，使用链式处理
 			if (is_array($this->maFields) && count($this->maFields) == 0)
 				$this->throwErr('链式访问时缺少fields()');
-
 			$sSql = $this->efficientSelect();
 			if (!empty($this->msLimit)) //加入记录集限制
 				$sSql .= $this->msLimit;
 		}
-
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->queryFirstCol($sSql, $bDBWR);
 	}
-
 	/**
 	 * SELECT操作，获取第一行记录[高效能操作]（使用链式操作时必须设置from()与fields()）<br/>
 	 * 使用: 如果使用链式操作，请不要设置$sSql参数。当设置了$sSql参数将以此SQL语句为准，链式操作无效。<br/>
@@ -859,10 +784,8 @@ class CDbCURD
 	 *  -----------------<br />
 	 *  $odb->db()->selectFirstRow(null, 'SELECT id_num, val_text FROM '.$odb->db()->TabN('test'). ' WHERE id_num=3')
 	 */
-	public function selectFirstRow($bDBWR=null, $sSql=null)
-	{
-		if (empty($sSql)) //$sSql不存在，使用链式处理
-		{
+	public function selectFirstRow($bDBWR=null, $sSql=null){
+		if (empty($sSql)){ //$sSql不存在，使用链式处理
 			if (is_array($this->maFields) && count($this->maFields) == 0)
 				$this->throwErr('链式访问时缺少fields()');
 
@@ -872,7 +795,6 @@ class CDbCURD
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->queryFirstRow($sSql, $bDBWR);
 	}
-
 	/**
 	 * SELECT操作，分页处理[高效能操作]（使用链式操作时必须设置from()与fields()）<br/>
 	 * 使用: 如果使用链式操作，请不要设置$sSql参数。当设置了$sSql参数将以此SQL语句为准，链式操作无效。<br/>
@@ -897,40 +819,32 @@ class CDbCURD
 	 *  -----------------<br />
 	 *  $odb->db()->selectPage(null, 'SELECT id_num, val_text FROM '.$odb->db()->TabN('test'))
 	 */
-	public function selectPage($iPage, $iPageSize, $bDBWR=null, $sSql=null)
-	{
-		if (empty($sSql)) //$sSql不存在，使用链式处理
-		{
+	public function selectPage($iPage, $iPageSize, $bDBWR=null, $sSql=null){
+		if (empty($sSql)){ //$sSql不存在，使用链式处理
 			if (is_array($this->maFields) && count($this->maFields) == 0)
 				$this->throwErr('链式访问时缺少fields()');
-
 			$sSql = $this->efficientSelect();
 		}
 
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->queryPage($sSql, $iPage, $iPageSize, $bDBWR);
 	}
-
 	/**
 	 * 截断表
 	 * @param string $sTable 需要截断的表名
 	 * @return bool
 	 */
-	public function truncate($sTable)
-	{
+	public function truncate($sTable){
 		return ($this->moDBO->exec('TRUNCATE TABLE '. $sTable) > 0);
 	}
-
 	/**
 	 * 执行无返回的SQL指令<br />
 	 * 返回: 操作影响的记录条数
 	 * @param string $sSql
 	 * @return int
 	 */
-	public function exec($sSql)
-	{
+	public function exec($sSql){
 		return $this->moDBO->exec($sSql);
 	}
 }
-
 ?>

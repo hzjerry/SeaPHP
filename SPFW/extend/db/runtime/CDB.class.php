@@ -17,57 +17,82 @@ final class CDB extends CExtModule
 {
 	/**
 	 * 数据库驱动类型验证关键字
+	 * @static
+	 * @access public
 	 * @var array
 	 */
 	static public $maDbType = array('mysqli', 'mysql', 'sqlite');
 	/**
 	 * 表名强制大小写验证关键字
+	 * @static
+	 * @access public
 	 * @var array
 	 */
 	static public $maTableUpperLowerKeys = array('upper', 'lower', 'intact');
 	/**
 	 * 数据库使用的字符集
+	 * @static
+	 * @access private
 	 * @var string
 	 */
 	static private $msCharset = null;
 	/**
 	 * 记录SQL的执行日志
+	 * @static
+	 * @access private
 	 * @var bool
 	 */
 	static private $mbWriteLog = false;
 	/**
 	 * 表对象访问包目录
+	 * @static
+	 * @access private
 	 * @var string
 	 */
 	static private $msTableObjectPath = null;
 	/**
 	 * SQL出错时打印出错信息
+	 * @static
+	 * @access public
 	 * @var bool
 	 */
 	static private $mbShowError = false;
 	/**
 	 * SELECT操作的默认库
+	 * @static
+	 * @access private
 	 * @var bool
 	 */
 	static private $mbSelectRW = null;
 	/**
+	 * 表对象缓存池
+	 * @static
+	 * @access public
+	 * @var array
+	 */
+	static public $maPoolTable = array();
+	/**
 	 * 表前缀
+	 * @access private
 	 * @var string | null
 	 */
 	private $msPrefix = null;
 	/**
-	 * 表名强制大小写<br />
-	 * [upper:强制大写|lower:强制小写|intact:保持原样]
+	 * 表名强制大小写
+	 * <li>[upper:强制大写|lower:强制小写|intact:保持原样]</li>
+	 * @access private
 	 * @var string
 	 */
 	private $msTableUpperLower = 'intact';
 	/**
 	 * 数据库连接对象
+	 * @access private
 	 * @var CDbDriver
 	 */
 	private $moDBL = null;
 	/**
 	 * 数据库操作对象
+	 * @access private
 	 * @var CDbCURD
 	 */
 	private $moCURD = null;
@@ -75,16 +100,14 @@ final class CDB extends CExtModule
 	/* (non-PHPdoc)
 	 * @see CExtModule::autoloadProfile()
 	 */
-	protected function autoloadProfile()
-	{
+	protected function autoloadProfile(){
 		$this->merger2autoload('extend.db.config', 'autoload.cfg.php');
 	}
 
 	/* (non-PHPdoc)
 	 * @see CExtModule::setName()
 	 */
-	protected function setName($sModule = __CLASS__)
-	{
+	protected function setName($sModule = __CLASS__){
 		$this->msModule = $sModule;
 	}
 
@@ -92,8 +115,7 @@ final class CDB extends CExtModule
 	 * 构造函数<br />
 	 * @param string $sDSN 数据库连接配置（配置文件必须存放于extend.db.dsn下，文件名与类名相同）
 	 */
-	public function __construct($sDSN)
-	{
+	public function __construct($sDSN){
 		parent::__construct();
 		$this->loagCfg(); //载入全局配置信息
 		//载入数据库连接配置对象
@@ -146,10 +168,8 @@ final class CDB extends CExtModule
 	/* (non-PHPdoc)
 	 * @see CExtModule::__destruct()
 	 */
-	public function __destruct()
-	{
-		if (self::$mbWriteLog)
-		{	//是否记录日志，由environment.cfg.php中的write_log控制
+	public function __destruct(){
+		if (self::$mbWriteLog){	//是否记录日志，由environment.cfg.php中的write_log控制
 			$aBuf = array();
 			foreach ($this->moDBL->getSqlLog() as $aNode)
 				$aBuf[] = implode('', array(date('H:i:s'), "\t", $aNode['time'], "\t", $aNode['sql']));
@@ -171,8 +191,7 @@ final class CDB extends CExtModule
 	/* (non-PHPdoc)
 	 * @see CExtModule::isAbleRun()
 	 */
-	public function isAbleRun()
-	{
+	public function isAbleRun(){
 		$aRet = array();
 		if (!function_exists('mysql_connect'))
 			$aRet['CDB (mysql_connect)'] = false;
@@ -191,10 +210,8 @@ final class CDB extends CExtModule
 	 * @return void
 	 * @access private
 	 */
-	private function loagCfg()
-	{	//防止多次载入，使用静态变量。
-		if (is_null(self::$msCharset))
-		{
+	private function loagCfg(){	//防止多次载入，使用静态变量。
+		if (is_null(self::$msCharset)){
 			$aCfg = import('extend.db.config', 'environment.cfg.php');
 			self::$msCharset = $aCfg['charset'];
 			self::$mbWriteLog = $aCfg['write_log'];
@@ -209,35 +226,60 @@ final class CDB extends CExtModule
 	 * 返回数据库操作对象
 	 * @return CDbCURD
 	 */
-	public function db()
-	{
+	public function db(){
 		return $this->moCURD;
 	}
-
-
 	/**
-	 * 返回表对象(以表为业务逻辑对象)<br />
-	 * 注意: 表对象存放于workgroup.db.table_object（可在environment.cfg.php中的table_object_path参数配置）
+	 * 从缓存池中取出已经存在的表对象
 	 * @param string $sTableName 表名
-	 * @param string $sProject 项目名称(默认无需设置)<br />
-	 * $sProject: 如在本框架内存在多个项目，可通过设置这个值来区分不同项目的表对象
-	 * @return CDbTable
+	 * @param string $sProject 项目名称
+	 * @return CDbTable|NULL
+	 * @access private
 	 */
-	public function tableObj($sTableName, $sProject=null)
-	{
-		//检查表对象类文件是否存在
-		$sPath = getMAC_ROOT() . getFW_ROOT() . strtr(self::$msTableObjectPath, array('.'=>'/')) .'/';
-		if (empty($sProject))
-			$sClassName = strtoupper($sTableName);
+	private function getTableFromPool($sTableName, $sProject){
+		if (isset(self::$maPoolTable[$sTableName .'_'. $sProject]))
+			return self::$maPoolTable[$sTableName .'_'. $sProject];
 		else
-			$sClassName = strtoupper(self::$msTableObjectPath .'_'. $sTableName);
-		if (file_exists($sPath . $sClassName .'.php'))//找到表对象
-			$oTable = import(self::$msTableObjectPath, $sClassName .'.php', $sClassName); //获得表对象
-		else
-			$oTable = new CDbTable(); //公共表对象
+			return null;
+	}
+	/**
+	 * 将表对象存入缓存池
+	 * @param string $sTableName 表名
+	 * @param string $sProject 项目名称
+	 * @param CDbTable CDbTable 表对象的引用
+	 * @return void
+	 * @access private
+	 */
+	private function appendTable2Pool($sTableName, $sProject, & $oTab){
+		if (!isset(self::$maPoolTable[$sTableName .'_'. $sProject]))
+			self::$maPoolTable[$sTableName .'_'. $sProject] = $oTab;
+	}
+	/**
+	 * 返回表对象(以表为业务逻辑对象)
+	 * <li>注意: 表对象存放于workgroup.db.table_object（可在environment.cfg.php中的table_object_path参数配置）</li>
+	 * @param string $sTableName 表名
+	 * @param string $sProject 项目名称(默认无需设置)
+	 * <li>$sProject: 如在本框架内存在多个项目，可通过设置这个值来区分不同项目的表对象</li>
+	 * @return CDbTable
+	 * @access public
+	 */
+	public function tableObj($sTableName, $sProject=null){
+		if (is_null($oTable = $this->getTableFromPool($sTableName, $sProject))){ //检查缓存池中是否已有对应的表对象
+			//检查表对象类文件是否存在
+			$sPath = getMAC_ROOT() . getFW_ROOT() . strtr(self::$msTableObjectPath, array('.'=>'/')) .'/';
+			if (empty($sProject))
+				$sClassName = strtoupper($sTableName);
+			else
+				$sClassName = strtoupper(self::$msTableObjectPath .'_'. $sTableName);
+			if (file_exists($sPath . $sClassName .'.php'))//找到表对象
+				$oTable = import(self::$msTableObjectPath, $sClassName .'.php', $sClassName); //获得表对象
+			else
+				$oTable = new CDbTable(); //公共表对象
 
-		$oTable->init($this->moDBL, $this->msPrefix, $this->msTableUpperLower, $sTableName); //初始化表对象
-		return $oTable;
+			$oTable->init($this->moDBL, $this->msPrefix, $this->msTableUpperLower, $sTableName); //初始化表对象
+			$this->appendTable2Pool($sTableName, $sProject, $oTable);//存入缓存池
+		}
+		return $oTable; //返回表对象
 	}
 }
 

@@ -2,7 +2,7 @@
  * jQuery url get parameters function [获取cookie参数的值]
  * @character_set UTF-8
  * @author Jerry.li(lijian@dzs.mobi)
- * @version 1.2013.08.03.2111
+ * @version 1.2014.09.22.2111
  *  Example
  * 	<code>
  *      var sVal = $.getCookie('key'); //获取cookie参数的值
@@ -29,7 +29,7 @@
                     end = document.cookie.indexOf(';',start);
                     if( end == -1)
                         end = document.cookie.length;
-                    return decodeURI(document.cookie.substring(start,end));
+                    return decodeURIComponent(document.cookie.substring(start,end));
                 }
             }
             return '';

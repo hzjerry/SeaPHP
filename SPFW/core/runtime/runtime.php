@@ -6,6 +6,7 @@
  * @package SPFW.core.runtime
  * @version V20130415
  * <li>V20140626 修改了microtime()函数，提高运行效率</li>
+ * <li>V20140928 修改了$GLOBALS['SEA_PHP_FW_VAR_HOST']全局变量，如果以命令行方式运行SEA_PHP_FW_VAR_HOST=null</li>
  */
 defined('SEA_PHP_INIT') or exit('sea php framework initialization step is not valid.'); //功能:让框架必须按顺序加载
 define('SEA_PHP_RUNTIME', true);  //功能:tag
@@ -40,9 +41,13 @@ else
 	$GLOBALS['SEA_PHP_FW_VAR_IP'] = "0.0.0.0";
 
 /*服务器主机头名称;例:www.fox.cn或www.fox.cn:8080*/
-$GLOBALS['SEA_PHP_FW_VAR_HOST'] =
-	($_SERVER['SERVER_PORT']=='80')? $_SERVER['SERVER_NAME'] :
-		$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
+if (isset($_SERVER['SERVER_NAME']) && isset($_SERVER['SERVER_PORT'])){
+	$GLOBALS['SEA_PHP_FW_VAR_HOST'] =
+		($_SERVER['SERVER_PORT']=='80')? $_SERVER['SERVER_NAME'] :
+			$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
+}else{
+	$GLOBALS['SEA_PHP_FW_VAR_HOST'] = null;
+}
 
 //autoload动态加载类处理
 $aAutoload = import('core.config', 'autoload.cfg.php');//载入架构的内核动态加载类配置表
@@ -56,23 +61,19 @@ unset($aAutoload, $aEF);
  * 动态加载类核心处理函数
  * @global SEA_PHP_FW_AUTOLOAD
  * */
-function seaphpAutoload($sClassName)
-{
+function seaphpAutoload($sClassName){
 	$aCfg = $GLOBALS['SEA_PHP_FW_AUTOLOAD'];
-	if (array_key_exists($sClassName, $aCfg))
-	{	//找到需要加载的类，开始加载
+	if (array_key_exists($sClassName, $aCfg)){	//找到需要加载的类，开始加载
 		import($aCfg[$sClassName]['package'], $aCfg[$sClassName]['file']);
-		if (!(class_exists($sClassName) || interface_exists($sClassName)))
-		{
+		if (!(class_exists($sClassName) || interface_exists($sClassName))){
 			echo '<pre>Access to autoload, beacuse not find [', $sClassName ,'] class or interface.', "\n";
 			foreach (dbg::TRACE() as $sNode)
 				echo $sNode, "\n";
 			echo '</pre>';
 			exit(0);
 		}
-	}
-	elseif (count(spl_autoload_functions()) == 1) //当不存在其他加载类时，类不存在则强制终止，并给出错误信息
-	{	//自动加载类为发现配置文件
+	}elseif (count(spl_autoload_functions()) == 1){ //当不存在其他加载类时，类不存在则强制终止，并给出错误信息
+		//自动加载类为发现配置文件
 		echo '<pre>Failed to autoload, class(', $sClassName, ') configuration file not found', "\n";
 		foreach (dbg::TRACE() as $sNode)
 			echo $sNode, "\n";

@@ -10,6 +10,7 @@
  *  2013-08-16 fixd bug:首次访问的时候速度非常慢,增加了
  *   curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);与$aHeader[] = 'Expect: ';<br />
  *  2013-11-13 fixd bug:增加了HTTPS的访问方式
+ *  2014-09-28 fixd bug:在使用命令行模式时，不取$_SERVER['HTTP_HOST']值
  * @example <pre>
 $o = new CPostHttp();
 $o->setCommFunc('file_get_contents'); //可选，默认为curl(curl 的效率极高)
@@ -166,7 +167,10 @@ final class CPostHttp
 		else
 		{	//初始化
 			$this->maPostFields = array();
-			$this->msReferer = 'http://'. $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+			if (isset($_SERVER['HTTP_HOST']))
+				$this->msReferer = 'http://'. $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF'];
+			else
+				$this->msReferer = $_SERVER['PHP_SELF'];
 		}
 	}
 
@@ -547,6 +551,7 @@ final class CPostHttp
 			$this->print_debug(__CLASS__ .'::'. __FUNCTION__ .': Send data to a remote URL',
 							   implode("\r\n", $aHeader) ."\r\n\r\n". $sPostFields);
 			$sData = curl_exec($ch); //得到服务器的回复内容
+// _dbge(curl_getinfo($ch));
 			if (false === $sData)
 			{	//通信失败
 				$this->msErrorMsg = curl_error($ch);
@@ -616,7 +621,7 @@ final class CPostHttp
 	}
 
 	/**
-	 * 执行GET操作
+	 * 执行GET操作，送出设定好的POST数据
 	 * @return bool
 	 * @access public
 	 * */

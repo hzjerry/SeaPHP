@@ -1,14 +1,15 @@
 <?php
 /**
- * 数据库操作层（CURD创建更新读取删除）<br/>
+ * 数据库操作层（CURD创建更新读取删除）
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20140923
- * @package SPFW.extend.db.lib
- * @see
+ * @version V0.20141009
  * <li>2013-05-07 jerryli 创立</li>
  * <li>2013-12-19 jerryli left_join(),from() 增加了强制指定索引</li>
  * <li>2014-06-22 jerryli 增加了UNID()函数，生成唯一识别号用于insert时的id字段(用于bigint字段)</li>
  * <li>2014-09-23 jerryli 修改了UNID()函数，末尾改为4位随机数，杜绝高频插入时出现主键相同的问题</li>
+ * <li>2014-10-09 jerryli 修改了from(),left_join()函数；增加了inner_join()函数；此3个函数中加入了表名可以使用子查询的功能</li>
+
+ * @package SPFW.extend.db.lib
  */
 class CDbCURD{
 	/**
@@ -184,10 +185,11 @@ class CDbCURD{
 		return $this;
 	}
 	/**
-	 * 操作的表名<br />
-	 * 用于: SELECT | DELECT | UPDATE 操作
+	 * 操作的表名
+	 * <li>用于: SELECT | DELECT | UPDATE 操作</li>
 	 * @param string $sTableName	表名(会自动添加表前缀)
-	 * @param string $sByname		表别名(默认为null;在left_join()子句中会使用)
+	 * <li>如果是子查询请用'(...)'包裹子查询的SQL串，此时系统不会添加表前缀；但此时必须包含$sByname，否则会抛出错误</li>
+	 * @param string $sByname		表别名(默认为null;在left_join()或inner_join子句中会使用)
 	 * @param string $sIndexName	强制使用指定的索引(默认null)
 	 * @return CDbCURD
 	 * @access public
@@ -195,24 +197,35 @@ class CDbCURD{
 	public function from($sTableName, $sByname=null, $sIndexName=null){
 		unset($this->maFrom);
 		$this->maFrom = array();
-		if (empty($sByname)) //不存在别名
-			$this->maFrom[] = $this->TabN($sTableName);
-		else	//加入别名的处理
-			$this->maFrom[] = $this->TabN($sTableName) . ' '. $sByname;
 
-		//是否强制指定索引
-		if (!is_null($sIndexName))
-			$this->maFrom[] = 'FORCE INDEX('. $sIndexName .')';
+		$sTableName = trim($sTableName);
+		if ($sTableName{0} === '(' && substr($sTableName, -1) === ')' ){ //$sTableName为子查询不加表前缀
+			if (empty($sByname)){	//子查询必须设置$sByname
+				echo '<br />Subquery must set $$sByname.',
+				implode('<br/>', dbg::TRACE());
+				exit(0);
+			}else{ //加入别名
+				$this->maFrom[] = $sTableName . ' '. $sByname;
+			}
+		}else{//正常表名
+			if (empty($sByname)) //不存在别名
+				$this->maFrom[] = $this->TabN($sTableName);
+			else	//加入别名的处理
+				$this->maFrom[] = $this->TabN($sTableName) . ' '. $sByname;
 
+			if (!is_null($sIndexName))//是否强制指定索引
+				$this->maFrom[] = 'FORCE INDEX('. $sIndexName .')';
+		}
 		return $this;
 	}
 	/**
-	 * 表左关联关系添加<br/>
-	 * 注意:必须在本函数前执行from($sTableName, $sByname),且$sByname参数必须设置。
-	 * 因为$sByname就是left_join()中$sLeftByname需要使用的参数
-	 * 用于: SELECT | DELECT | UPDATE 操作
+	 * 表左关联关系添加
+	 * <li>注意:必须在本函数前执行from($sTableName, $sByname),且$sByname参数必须设置。</li>
+	 * <li>因为$sByname就是left_join()中$sLeftByname需要使用的参数</li>
+	 * <li>用于: SELECT | DELECT | UPDATE 操作</li>
 	 * @param string $sLeftByname 主表别名
-	 * @param string $sJoinTable 被关联表(会自动添加表前缀)
+	 * @param string $sJoinTable 被关联表(系统会自动将表名添加表前缀)
+	 * <li>如果是子查询请用'(...)'包裹子查询的SQL串，此时系统不会添加表前缀；但此时必须包含$sJoinByname，否则会抛出错误</li>
 	 * @param string $sJoinByname 被关联表别名(''|null|别名)
 	 * @param string|array $aJoinId 关联字段 'field' 或 array('left_field', 'join_field')
 	 * @param string $sIndexName 强制使用指定的索引(默认null)
@@ -220,7 +233,39 @@ class CDbCURD{
 	 * @access public
 	 */
 	public function left_join($sLeftByname, $sJoinTable, $sJoinByname, $aJoinId, $sIndexName=null){
-		if (empty($sLeftByname)){	//别名不能为空
+		return $this->join('LEFT', $sLeftByname, $sJoinTable, $sJoinByname, $aJoinId, $sIndexName);
+	}
+	/**
+	 * 表内关联关系添加
+	 * <li>注意:必须在本函数前执行from($sTableName, $sByname),且$sByname参数必须设置。</li>
+	 * <li>因为$sByname就是inner_join()中$sInnerByname需要使用的参数</li>
+	 * <li>用于: SELECT | DELECT | UPDATE 操作</li>
+	 * @param string $sInnerByname 主表别名
+	 * @param string $sJoinTable 被关联表(系统会自动将表名添加表前缀)
+	 * <li>如果是子查询请用'(...)'包裹子查询的SQL串，此时系统不会添加表前缀；但此时必须包含$sJoinByname，否则会抛出错误</li>
+	 * @param string $sJoinByname 被关联表别名(''|null|别名)
+	 * @param string|array $aJoinId 关联字段 'field' 或 array('inner_field', 'join_field')
+	 * @param string $sIndexName 强制使用指定的索引(默认null)
+	 * @return CDbCURD
+	 * @access public
+	 */
+	public function inner_join($sInnerByname, $sJoinTable, $sJoinByname, $aJoinId, $sIndexName=null){
+		return $this->join('INNER', $sInnerByname, $sJoinTable, $sJoinByname, $aJoinId, $sIndexName);
+	}
+	/**
+	 * 表关联关系添加
+	 * @param string $sJoinType 连接操作[LEFT|INNER]
+	 * @param string $sMainByname 主表别名
+	 * @param string $sJoinTable 被关联表(系统会自动将表名添加表前缀)
+	 * <li>如果是子查询请用'(...)'包裹子查询的SQL串，此时系统不会添加表前缀；但此时必须包含$sJoinByname，否则会抛出错误</li>
+	 * @param string $sJoinByname 被关联表别名(''|null|别名)
+	 * @param string|array $aJoinId 关联字段
+	 * @param string $sIndexName 强制使用指定的索引(默认null)
+	 * @return CDbCURD
+	 * @access private
+	 */
+	private function join($sJoinType, $sMainByname, $sJoinTable, $sJoinByname, $aJoinId, $sIndexName=null){
+		if (empty($sMainByname)){	//别名不能为空
 			echo '<br />The left_join() $sLeftByname is missing.',
 				 implode('<br/>', dbg::TRACE());
 			exit(0);
@@ -229,12 +274,20 @@ class CDbCURD{
 			implode('<br/>', dbg::TRACE());
 			exit(0);
 		}
-
-		$sJoinTable = $this->TabN($sJoinTable);
+		$sJoinTable = trim($sJoinTable);
+		if ($sJoinTable{0} === '(' && substr($sJoinTable, -1) === ')' ){ //$sJoinTable为子查询不加表前缀
+			if (empty($sJoinByname)){	//子查询必须设置$sJoinByname
+				echo '<br />Subquery must set $sJoinByname.',
+				implode('<br/>', dbg::TRACE());
+				exit(0);
+			}
+		}else{
+			$sJoinTable = $this->TabN($sJoinTable);
+		}
 
 		$aBuf = array();
 		//加入右表关联表名
-		$aBuf[] = 'LEFT JOIN';
+		$aBuf[] = $sJoinType .' JOIN';
 		if (!empty($sJoinByname))
 			array_push($aBuf, $sJoinTable, $sJoinByname);
 		else
@@ -248,9 +301,9 @@ class CDbCURD{
 		$sJoinTable = (empty($sJoinByname)) ? $sJoinTable : $sJoinByname; //如果右表有别名，使用别名
 		//加入两个关联表的链接字段
 		if (count($aJoinId) == 1)
-			array_push($aBuf, 'ON(', $sLeftByname .'.'. $aJoinId[0], '=', $sJoinTable .'.'. $aJoinId[0], ')');
+			array_push($aBuf, 'ON(', $sMainByname .'.'. $aJoinId[0], '=', $sJoinTable .'.'. $aJoinId[0], ')');
 		else
-			array_push($aBuf, 'ON(', $sLeftByname .'.'. $aJoinId[0], '=', $sJoinTable .'.'. $aJoinId[1], ')');
+			array_push($aBuf, 'ON(', $sMainByname .'.'. $aJoinId[0], '=', $sJoinTable .'.'. $aJoinId[1], ')');
 
 		array_push($this->maFrom, implode(' ', $aBuf));
 		return $this;

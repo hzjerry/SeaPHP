@@ -8,6 +8,7 @@
  * <li>2014-06-22 jerryli 增加了UNID()函数，生成唯一识别号用于insert时的id字段(用于bigint字段)</li>
  * <li>2014-09-23 jerryli 修改了UNID()函数，末尾改为4位随机数，杜绝高频插入时出现主键相同的问题</li>
  * <li>2014-10-09 jerryli 修改了from(),left_join()函数；增加了inner_join()函数；此3个函数中加入了表名可以使用子查询的功能</li>
+ * <li>2014-10-14 jerryli 增加了selectCallback()函数</li>
 
  * @package SPFW.extend.db.lib
  */
@@ -847,6 +848,60 @@ class CDbCURD{
 
 		$this->clear(); //清除链式缓存
 		return $this->moDBO->queryFirstRow($sSql, $bDBWR);
+	}
+	/**
+	 * SELECT操作（对每个ROW执行一次回调函数）
+	 * @param closure $callFunc 闭包函数
+	 * <li>闭包函数$callFunc的入口参数array:array('field1'=>'val1', 'field2'=>'val2', ...)</li>
+	 * <li>如果$callFunc不是一个闭包函数，将直接报错</li>
+	 * @param bool $bDBWR 选择主库与只读库<br />
+	 * （null:表示使用dsn中的默认配置; | true:强制操作主库 | false:强制操作只读库）
+	 * @param string $sSql SELECT的SQL语句（null:表示使用链式操作;）<br />
+	 * @return void
+	 * @access public
+	 * @example<pre>
+		class export2File{ //将数据导出到csv文件类
+			private $oFile = null;
+			public function __construct($sPath){
+				$this->oFile = fopen($sPath, 'w');
+				if (($this->oFile = fopen($sPath, 'w')) === false)
+					$this->oFile = null;
+			}
+			public function __destruct(){
+				if (!is_null($this->oFile))
+					fclose($this->oFile);
+			}
+			function wirte2file(){ //闭包函数
+				return function($aRow){
+					$aVals = array_values($aRow);
+					foreach ($aVals as & $sVal)
+						$sVal = iconv("utf-8", "gbk", $sVal);
+					fputcsv($this->oFile, $aVals);
+				};
+			}
+		}
+
+		$op = new export2File('h:/temp.csv');
+		$odb->db()
+	   	->fields(array('id_num', 'val_text'))
+	   	->from('test')
+	   	->where('id_num={@id}', array('{@id}'=>1))
+	   	->group('val_text')
+	 		->having('...')
+	   	->order('id_num ASC')
+		->queryRowCallback($op->wirte2file());//对每条记录调用一次闭包函数
+		</pre>
+	 */
+	public function selectCallback($callFunc, $bDBWR=null, $sSql=null){
+		if (empty($sSql)){ //$sSql不存在，使用链式处理
+			if (is_array($this->maFields) && count($this->maFields) == 0)
+				$this->throwErr('链式访问时缺少fields()');
+
+			$sSql = $this->efficientSelect();
+		}
+
+		$this->clear(); //清除链式缓存
+		return $this->moDBO->queryRowCallback($callFunc, $sSql, $bDBWR);
 	}
 	/**
 	 * SELECT操作，分页处理[高效能操作]（使用链式操作时必须设置from()与fields()）<br/>

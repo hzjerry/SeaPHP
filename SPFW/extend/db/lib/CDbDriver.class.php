@@ -7,9 +7,9 @@
  * @abstract
  * @version V0.20130501
  * <li>V0.20140626 修改了microtime()参数，提高效率</li>
+ * <li>V0.20141014 增加了queryRowCallback抽象函数，支持对查询结果的每条ROW执行回调函数</li>
  */
-abstract class CDbDriver
-{
+abstract class CDbDriver{
 	/**
 	 * 数据库类型 [MySql | Qracle | Sqlite]
 	 * @var string
@@ -61,8 +61,7 @@ abstract class CDbDriver
 	 * @return void
 	 * @access public
 	 */
-	public function setSelectRW($bRW)
-	{
+	public function setSelectRW($bRW){
 		$this->mbSelectRW = $bRW;
 	}
 
@@ -71,8 +70,7 @@ abstract class CDbDriver
 	 * @return void
 	 * @access public
 	 */
-	public function setSqlErrShow()
-	{
+	public function setSqlErrShow(){
 		$this->mbErrShow = true;
 	}
 
@@ -83,10 +81,8 @@ abstract class CDbDriver
 	 * @return void
 	 * @access protected
 	 */
-	protected function showSqlErr($sCode, $sMsg)
-	{
-		if ($this->mbErrShow)
-		{
+	protected function showSqlErr($sCode, $sMsg){
+		if ($this->mbErrShow){
 			$aTmp = array_pop($this->maSqlLog);
 			echo '<blockquote>',
 				 '<font face="arial" size="2" color="ff0000">',
@@ -105,8 +101,7 @@ abstract class CDbDriver
 	 * @return void
 	 * @access public
 	 */
-	public function showSqlHistory()
-	{
+	public function showSqlHistory(){
 		echo '<blockquote>';
 		echo '<font face="arial" size="2" color="000099"><strong>SQL History:--</strong><ul>';
 		foreach ($this->maSqlLog as $aNode)
@@ -121,8 +116,7 @@ abstract class CDbDriver
 	 * @return maSqlLog
 	 * @access public
 	 */
-	public function getSqlLog()
-	{
+	public function getSqlLog(){
 		return $this->maSqlLog;
 	}
 
@@ -131,8 +125,7 @@ abstract class CDbDriver
 	 * @return void
 	 * @access protected
 	 */
-	protected function startTimer()
-	{
+	protected function startTimer(){
 		$this->mfTimer = microtime(true);
 	}
 
@@ -141,8 +134,7 @@ abstract class CDbDriver
 	 * @return float
 	 * @access protected
 	 */
-	private function endTimer()
-	{
+	private function endTimer(){
 		return round( (microtime(true) - $this->mfTimer) * 1000 , 4);
 	}
 
@@ -153,8 +145,7 @@ abstract class CDbDriver
 	 * @return void
 	 * @access protected
 	 */
-	protected function addSqlHistory($sSql)
-	{
+	protected function addSqlHistory($sSql){
 		$this->maSqlLog[] = array('sql'=>$sSql, 'time'=>$this->endTimer());
 	}
 
@@ -260,6 +251,16 @@ abstract class CDbDriver
 	abstract public function queryFirstCol($sSql, $bRW = null);
 
 	/**
+	 * 查询指令（对每条返回的记录执行回调闭包函数$callFunc）
+	 * @param closure $callFunc 闭包函数
+	 * <li>闭包函数$callFunc的入口参数array:array('field1'=>'val1', 'field2'=>'val2', ...)</li>
+	 * <li>如果$callFunc不是一个闭包函数，将直接报错</li>
+	 * @param string $sSql SQL指令
+	 * @param bool $bRW [true:读写库 | false:只读库 | null:系统默认值详见setSelectRW()]
+	 */
+	abstract public function queryRowCallback($callFunc, $sSql, $bRW = null);
+
+	/**
 	 * 查询指令(高性能查询)<br />
 	 * 返回: 以二维数组格式，返回整个记录集<br />
 	 * array(array('field1'=>'value',...),...)
@@ -287,8 +288,7 @@ abstract class CDbDriver
 	 * @return string
 	 * @abstract
 	 */
-	public function getDbType()
-	{
+	public function getDbType(){
 		return $this->msDbType;
 	}
 }

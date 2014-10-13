@@ -9,8 +9,7 @@
  * @see IDbDriver
  * @example
  * */
-class CDbDriverMySqli extends CDbDriver
-{
+class CDbDriverMySqli extends CDbDriver{
 	/**
 	 * 连接配置关键字列表(检查配置连接完整性用)
 	 * @var array
@@ -49,15 +48,11 @@ class CDbDriverMySqli extends CDbDriver
 	 * @param array $aMaster 主库连接配置
 	 * @param array $aSlave 只读库连接配置
 	 */
-	function __construct($sCharset, $aMaster, $aSlave=null)
-	{
-		if (version_compare(phpversion(), '5.2.9', '<'))
-		{	//当前版本不够运行
+	function __construct($sCharset, $aMaster, $aSlave=null){
+		if (version_compare(phpversion(), '5.2.9', '<')){	//当前版本不够运行
 			echo '<br/>mysqli running version must be &lt;= 5.2.9.';
 			exit(0);
-		}
-		elseif (!class_exists('mysqli'))
-		{	//mysqli未安装
+		}elseif (!class_exists('mysqli')){	//mysqli未安装
 			echo '<br/>mysqli is not installed.';
 			exit(0);
 		}
@@ -65,8 +60,7 @@ class CDbDriverMySqli extends CDbDriver
 		$this->msCharset = $sCharset; //设定字符集
 
 		//检查主库配置数组
-		if (is_array($aMaster) && !$this->checkConnectCfgArray($aMaster))
-		{
+		if (is_array($aMaster) && !$this->checkConnectCfgArray($aMaster)){
 			echo '<br/>Lack the necessary database configuration parameter.<br />',
 				 'Must have parameters:', implode(',', self::$maConnKeys);
 			exit(0);
@@ -74,8 +68,7 @@ class CDbDriverMySqli extends CDbDriver
 		$this->maMaster = $aMaster;
 
 		//检查只读库配置数组
-		if (!empty($aSlave) && !$this->checkConnectCfgArray($aSlave))
-		{
+		if (!empty($aSlave) && !$this->checkConnectCfgArray($aSlave)){
 			echo '<br/>Lack the necessary database configuration parameter.<br />',
 				 'Must have parameters:', implode(',', self::$maConnKeys);
 			exit(0);
@@ -89,19 +82,16 @@ class CDbDriverMySqli extends CDbDriver
 	/**
 	 * 析构函数
 	 */
-	public function __destruct()
-	{
+	public function __destruct(){
 		if ($this->mmR == $this->mmRW)
 			$this->mmR = null; //两个连接指向同一个地址时，直接删除只读库引用
 
-		if (!is_null($this->mmRW))
-		{
+		if (!is_null($this->mmRW)){
 			$this->mmRW->close();
 			unset($this->mmRW);
 			$this->mmRW = null;
 		}
-		if (!is_null($this->mmR))
-		{
+		if (!is_null($this->mmR)){
 			$this->mmR->close();
 			unset($this->mmR);
 			$this->mmR = null;
@@ -114,25 +104,20 @@ class CDbDriverMySqli extends CDbDriver
 	 * @return mysqli
 	 * @access private
 	 */
-	private function ConnWhenNeeded($bRW = null)
-	{
+	private function ConnWhenNeeded($bRW = null){
 		if (is_null($bRW)) //载入系统默认配置
 			$bRW = $this->mbSelectRW;
 
-		if ($bRW)
-		{	//读写库连接
-			if (empty($this->mmRW))
-			{	//建立连接
-				$this->mmRW = $this->connect
-				(
+		if ($bRW){	//读写库连接
+			if (empty($this->mmRW)){	//建立连接
+				$this->mmRW = $this->connect(
 					$this->maMaster['host'],
 					$this->maMaster['username'],
 					$this->maMaster['pwd'],
 					$this->maMaster['dbname'],
 					$this->maMaster['port']
 				);
-				$this->msRW_MD5 = md5
-				(
+				$this->msRW_MD5 = md5(
 					$this->maMaster['host'] .
 					$this->maMaster['username'] .
 					$this->maMaster['pwd'] .
@@ -142,26 +127,21 @@ class CDbDriverMySqli extends CDbDriver
 				);
 			}
 			return $this->mmRW;
-		}
-		else
-		{	//只读库连接
-			if (empty($this->mmR))
-			{	//建立连接
+		}else{	//只读库连接
+			if (empty($this->mmR)){	//建立连接
 				if (is_array($this->maSlave))
 					$aCfg = $this->maSlave;
 				else //只读库不存在时，直接连接主库
 					$aCfg = $this->maMaster;
 
-				$this->mmR = $this->connect
-				(
+				$this->mmR = $this->connect(
 					$aCfg['host'],
 					$aCfg['username'],
 					$aCfg['pwd'],
 					$aCfg['dbname'],
 					$aCfg['port']
 				);
-				$this->msR_MD5 = md5
-				(
+				$this->msR_MD5 = md5(
 					$aCfg['host'] .
 					$aCfg['username'] .
 					$aCfg['pwd'] .
@@ -180,11 +160,9 @@ class CDbDriverMySqli extends CDbDriver
 	 * @return bool
 	 * @access private
 	 */
-	private function checkConnectCfgArray($aCfg)
-	{
+	private function checkConnectCfgArray($aCfg){
 		//建立数据库连接
-		foreach ($aCfg as $sKey => $sVal)
-		{
+		foreach ($aCfg as $sKey => $sVal){
 			if (!in_array($sKey, self::$maConnKeys))
 				return false;
 		}
@@ -194,27 +172,21 @@ class CDbDriverMySqli extends CDbDriver
 	/* (non-PHPdoc)
 	 * @see IDbDriver::connect()
 	 */
-	protected function connect($sHost, $sUserName, $sPwd, $sDataBaseName, $iPort=3306)
-	{
+	protected function connect($sHost, $sUserName, $sPwd, $sDataBaseName, $iPort=3306){
 		static $aRDbPool = array();
 		$sConSre = md5($sHost . $sUserName . $sPwd . $sDataBaseName . $this->msCharset . $iPort); //生成缓存池识别码
-		if (array_key_exists($sConSre, $aRDbPool))
-		{	//在缓存池中找到对象
+		if (array_key_exists($sConSre, $aRDbPool)){	//在缓存池中找到对象
 			$oMysqli = $aRDbPool[$sConSre]; //取出缓存池中已经存在的链接对象
-		}
-		else
-		{	//创建新对象
+		}else{	//创建新对象
 			$oMysqli = new mysqli($sHost, $sUserName, $sPwd, $sDataBaseName, $iPort); //这是一个耗时操作
-			if ($oMysqli->connect_error)
-			{
+			if ($oMysqli->connect_error){
 				echo '<br/> Failed to create a database connection.',
 					 '<br/> Error msg: ', $oMysqli->connect_error;
 				exit(0);
 				return null;
 			}
 			//设定默认字符集
-			if (!$oMysqli->set_charset($this->msCharset))
-			{
+			if (!$oMysqli->set_charset($this->msCharset)){
 				echo '<br />MySql error: fail loading character set ', $this->msCharset ,"\n";
 				exit(0);
 			}
@@ -226,11 +198,9 @@ class CDbDriverMySqli extends CDbDriver
 	/* (non-PHPdoc)
 	 * @see IDbDriver::exec()
 	 */
-	public function exec($sSql, $bGetId = false)
-	{
+	public function exec($sSql, $bGetId = false){
 		$odb = $this->ConnWhenNeeded();
-		if ($bGetId && (preg_match('/^(insert)\s+\S*/i', $sSql) > 0) )
-		{	//只有insert才需要这个处理
+		if ($bGetId && (preg_match('/^(insert)\s+\S*/i', $sSql) > 0) ){	//只有insert才需要这个处理
 			$this->startTimer();
 			$results = $odb->query($sSql, MYSQLI_STORE_RESULT);
 			$this->addSqlHistory($sSql);
@@ -238,9 +208,7 @@ class CDbDriverMySqli extends CDbDriver
 				$this->showSqlErr($odb->errno, $odb->error); //SQL语句有问题
 			else
 				return $odb->insert_id; //返回ID
-		}
-		else
-		{
+		}else{
 			$this->startTimer();
 			$bRet = $odb->query($sSql, MYSQLI_USE_RESULT);
 			$this->addSqlHistory($sSql);
@@ -255,23 +223,19 @@ class CDbDriverMySqli extends CDbDriver
 	 * 只支持: insert | update | delete | replace
 	 * @see IDbDriver::transaction()
 	 */
-	public function transaction($aSqls)
-	{
-		foreach ($aSqls as $sSql)
-		{	//逐个检查每条指令，过滤掉不支持事务的指令
+	public function transaction($aSqls){
+		foreach ($aSqls as $sSql){	//逐个检查每条指令，过滤掉不支持事务的指令
 			if ((preg_match('/^(insert|update|delete|replace)\s+\S*/i', $sSql) == 0))
 				return false;
 		}
 
 		$odb = $this->ConnWhenNeeded();
 		$odb->autocommit(false);//关闭自动提交
-		foreach ($aSqls as $sSql)
-		{
+		foreach ($aSqls as $sSql){
 			$this->startTimer();
 			$bRet = $odb->query($sSql, MYSQLI_USE_RESULT);
 			$this->addSqlHistory($sSql);
-			if (false === $bRet)
-			{
+			if (false === $bRet){
 				$sErrCode = $odb->errno;
 				$sErrMsg = $odb->error;
 				$odb->rollback(); //回滚事务
@@ -287,8 +251,7 @@ class CDbDriverMySqli extends CDbDriver
 	/* (non-PHPdoc)
 	 * @see IDbDriver::query()
 	 */
-	public function query($sSql, $bRW = null)
-	{
+	public function query($sSql, $bRW = null){
 		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
@@ -297,12 +260,9 @@ class CDbDriverMySqli extends CDbDriver
 		$this->startTimer();
 		$results = $odb->query($sSql, MYSQLI_STORE_RESULT);
 		$this->addSqlHistory($sSql);
-		if ($results === false)
-		{	//SQL语句有问题
+		if ($results === false){	//SQL语句有问题
 			$this->showSqlErr($odb->errno, $odb->error);
-		}
-		else
-		{
+		}else{
 			$aRet = array();
 			while(!is_null($aRow = $results->fetch_array(MYSQLI_ASSOC)))
 				$aRet[] = $aRow;
@@ -318,8 +278,7 @@ class CDbDriverMySqli extends CDbDriver
 	/* (non-PHPdoc)
 	 * @see IDbDriver::queryPage()
 	*/
-	public function queryPage($sSql, $iPage, $iPageSize, $bRW = null)
-	{
+	public function queryPage($sSql, $iPage, $iPageSize, $bRW = null){
 		static $sTemplate = ' LIMIT {@start}, {@cnt}';
 
 		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
@@ -337,12 +296,9 @@ class CDbDriverMySqli extends CDbDriver
 		$this->startTimer();
 		$results = $odb->query($sSql, MYSQLI_STORE_RESULT);
 		$this->addSqlHistory($sSql);
-		if ($results === false)
-		{	//SQL语句有问题
+		if ($results === false){	//SQL语句有问题
 			$this->showSqlErr($odb->errno, $odb->error);
-		}
-		else
-		{
+		}else{
 			$aRet = array();
 			while(!is_null($aRow = $results->fetch_array(MYSQLI_ASSOC)))
 				$aRet[] = $aRow;
@@ -368,12 +324,9 @@ class CDbDriverMySqli extends CDbDriver
 		$sSql .= ' LIMIT 1';
 		$results = $odb->query($sSql, MYSQLI_USE_RESULT); //无缓存直接输出
 		$this->addSqlHistory($sSql);
-		if ($results === false)
-		{	//SQL语句有问题
+		if ($results === false){	//SQL语句有问题
 			$this->showSqlErr($odb->errno, $odb->error);
-		}
-		else
-		{
+		}else{
 			$aRow = $results->fetch_array(MYSQLI_NUM);
 			$results->free(); //释放对象
 			if (is_null($aRow))
@@ -386,8 +339,7 @@ class CDbDriverMySqli extends CDbDriver
 	/* (non-PHPdoc)
 	 * @see IDbDriver::queryFirstRow()
 	 */
-	public function queryFirstRow($sSql, $bRW = null)
-	{
+	public function queryFirstRow($sSql, $bRW = null){
 		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
@@ -398,8 +350,7 @@ class CDbDriverMySqli extends CDbDriver
 		$this->addSqlHistory($sSql);
 		if ($results === false)
 			$this->showSqlErr($odb->errno, $odb->error);//SQL语句有问题
-		else
-		{
+		else{
 			$aRow = $results->fetch_array(MYSQLI_ASSOC);
 			$results->free(); //释放对象
 			if (is_null($aRow))
@@ -410,10 +361,40 @@ class CDbDriverMySqli extends CDbDriver
 	}
 
 	/* (non-PHPdoc)
+	 * @see IDbDriver::queryRowCallback()
+	*/
+	public function queryRowCallback($callFunc, $sSql, $bRW = null){
+		if (!is_callable($callFunc)){ //$callFunc无效的闭包函数
+			$this->showSqlErr('0000', 'queryRowCallback () executable invalid Anonymous functions(or closures)');
+		}
+		$iRowCnt = 0;
+			if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
+			return null;
+
+		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
+
+		$this->startTimer();
+		$results = $odb->query($sSql, MYSQLI_STORE_RESULT);
+		$this->addSqlHistory($sSql);
+		if ($results === false){	//SQL语句有问题
+			$this->showSqlErr($odb->errno, $odb->error);
+		}else{
+			$aRet = array();
+			while(!is_null($aRow = $results->fetch_array(MYSQLI_ASSOC)))
+				$callFunc($aRow);
+			$results->free(); //释放对象
+			unset($results);
+			if (count($aRet) == 0)
+				return null; //未找到记录集
+			else
+				return $aRet; //输出记录集
+		}
+	}
+
+	/* (non-PHPdoc)
 	 * @see IDbDriver::queryFirstCol()
 	 */
-	public function queryFirstCol($sSql, $bRW = null)
-	{
+	public function queryFirstCol($sSql, $bRW = null){
 		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
@@ -424,8 +405,7 @@ class CDbDriverMySqli extends CDbDriver
 		$this->addSqlHistory($sSql);
 		if ($results === false)
 			$this->showSqlErr($odb->errno, $odb->error);//SQL语句有问题
-		else
-		{
+		else{
 			$aRet = array();
 			while(!is_null($aRow = $results->fetch_array(MYSQLI_NUM)))
 				$aRet[] = $aRow[0];
@@ -440,8 +420,7 @@ class CDbDriverMySqli extends CDbDriver
 	/* (non-PHPdoc)
 	 * @see IDbDriver::showApiVer()
 	 */
-	public function showApiVer()
-	{
+	public function showApiVer(){
 		$odb = $this->ConnWhenNeeded();
 		return 'mysqli['. $this->getDbType() .' protocol version: '. $odb->protocol_version .']';
 	}
@@ -449,8 +428,7 @@ class CDbDriverMySqli extends CDbDriver
 	/* (non-PHPdoc)
 	 * @see IDbDriver::getDbType()
 	 */
-	public function getDbType()
-	{
+	public function getDbType(){
 		return $this->msDbType;
 	}
 }

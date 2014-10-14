@@ -39,5 +39,9 @@ return array
 	array('package'=>'extend.weixin_service.lib',	'file'=>'CWeiXinEventLocation.class.php'),
 'CWeiXinEventMsg'=> // 一般信息类事件的响应处理
 	array('package'=>'extend.weixin_service.lib',	'file'=>'CWeiXinEventMsg.class.php'),
+'CWeiXinEventScanCode'=> // 菜单扫码识别事件
+	array('package'=>'extend.weixin_service.lib',	'file'=>'CWeiXinEventScanCode.class.php'),
+'CWeiXinEventLocationSelect'=> // 菜单弹出地理位置选择器的事件推送
+	array('package'=>'extend.weixin_service.lib',	'file'=>'CWeiXinEventLocationSelect.class.php'),
 );
 ?>

@@ -19,12 +19,19 @@ abstract class CWeiXinEventBase extends CWeiXinResponse{
 	 */
 	protected $_sEvent = null;
 	/**
+	 * 事件KEY值
+	 * @var string
+	 */
+	protected $_sEventKey = null;
+	/**
 	 * 初始化基本参数
 	 * @param array $aXml XML结构数组
 	 */
 	public function initParam(& $aXml){
 		parent::initParam($aXml);
 		$this->_sEvent = $aXml['event']['C'];
+		if (isset($aXml['eventkey']))
+			$this->_sEventKey = $aXml['eventkey']['C'];
 	}
 }
 ?>

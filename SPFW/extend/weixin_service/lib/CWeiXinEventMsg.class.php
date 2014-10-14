@@ -8,11 +8,6 @@
  */
 abstract class CWeiXinEventMsg extends CWeiXinEventBase{
 	/**
-	 * 事件KEY值
-	 * @var string
-	 */
-	protected $_sEventKey = null;
-	/**
 	 * 二维码的ticket
 	 * <li>id可用来换取二维码图片</li>
 	 * @var string
@@ -25,8 +20,6 @@ abstract class CWeiXinEventMsg extends CWeiXinEventBase{
 	 */
 	public function initParam(& $aXml){
 		parent::initParam($aXml);
-		if (isset($aXml['eventkey']))
-			$this->_sEventKey = $aXml['eventkey']['C'];
 		if (isset($aXml['ticket']))
 			$this->_sTicket = $aXml['ticket']['C'];
 	}

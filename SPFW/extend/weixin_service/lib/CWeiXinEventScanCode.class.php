@@ -9,7 +9,7 @@
 abstract class CWeiXinEventScanCode extends CWeiXinEventBase{
 	/**
 	 * 条码类型
-	 * <li>二维码:qrcode|一维条码:暂时未知</li>
+	 * <li>二维码:qrcode|一维条码:barcode</li>
 	 * @var string
 	 */
 	protected $_sScanType = null;

@@ -108,11 +108,12 @@ final class CWeiXinHelper extends CExtModule implements IExtFramework{
 	 */
 	public function visitVerify(){
 		if (isset($_GET['signature'])){
-			$signature = $_GET["signature"];
-			$timestamp = $_GET["timestamp"];
-			$nonce = $_GET["nonce"];
-
-			$aTmp = array($this->_sVerifyToken, $timestamp, $nonce);
+			$signature = $_GET['signature'];
+			$timestamp = $_GET['timestamp'];
+			$nonce = $_GET['nonce'];
+			$sDomain = (isset($_GET['e']))? $_GET['e'] : '';
+			//验证规则 md5($sDomain . $this->_sVerifyToken)
+			$aTmp = array(md5($sDomain . $this->_sVerifyToken), $timestamp, $nonce);
 			sort($aTmp, SORT_STRING); //按照协议要求进行排序
 			if (sha1(implode('', $aTmp)) === $_GET['signature']){//验证通过
 				if (isset($_GET['echostr'])){
@@ -147,8 +148,12 @@ final class CWeiXinHelper extends CExtModule implements IExtFramework{
 			$sEvent = $aXml['event']['C'];
 			if ('LOCATION' === $sEvent){//上报地理位置事件
 				$sLogicClass = 'CWeiXinEventLocationLogic';
-			}elseif (in_array($sEvent, array('subscribe', 'unsubscribe', 'CLICK', 'VIEW', 'SCAN'))){//一般信息事件
+			}elseif (in_array($sEvent, array('subscribe', 'unsubscribe', 'SCAN', 'CLICK', 'VIEW'))){//一般信息事件
 				$sLogicClass = 'CWeiXinEventMsgLogic';
+			}elseif (in_array($sEvent, array('scancode_push', 'scancode_waitmsg'))){//菜单的扫码识别事件
+				$sLogicClass = 'CWeiXinEventScanCodeLogic';
+			}elseif (in_array($sEvent, array('location_select'))){//菜单弹出地理位置选择器的事件推送
+				$sLogicClass = 'CWeiXinEventLocationSelectLogic';
 			}
 		}
 		if (null !== $sLogicClass){ //命中适配类的处理

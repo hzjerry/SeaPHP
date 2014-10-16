@@ -15,11 +15,9 @@ defined('SEA_PHP_RUNTIME') or exit('sea php framework initialization step is not
  * 返回值中，末尾不带'/'需要自己添加
  * @global SEA_PHP_FW_DIR_MACHINE_ROOT
  */
-function getMAC_ROOT()
-{
+function getMAC_ROOT(){
 	static $sPath = null;
-	if (is_null($sPath))
-	{	//初始化根路径
+	if (is_null($sPath)){	//初始化根路径
 		$sPath = $GLOBALS['SEA_PHP_FW_DIR_MACHINE_ROOT'];
 	}
 	return $sPath;
@@ -31,11 +29,9 @@ function getMAC_ROOT()
  * @return string 网站项目的相对根路径（即Web的'/'起始位置）
  * @global SEA_PHP_FW_DIR_WEB_ROOT
  */
-function getWEB_ROOT()
-{
+function getWEB_ROOT(){
 	static $sPath = null;
-	if (is_null($sPath))
-	{	//初始化根路径
+	if (is_null($sPath)){	//初始化根路径
 		$sPath = $GLOBALS['SEA_PHP_FW_DIR_WEB_ROOT'];
 	}
 	return $sPath;
@@ -47,11 +43,9 @@ function getWEB_ROOT()
  * @return string 框架的所在目录的绝对路径（即以SPFW目录内为起始位置）
  * @global SEA_PHP_FW_DIR_WEB_ROOT, SEA_PHP_FW_DIR_SPFW_ROOT
  */
-function getFW_ROOT()
-{
+function getFW_ROOT(){
 	static $sPath = null;
-	if (is_null($sPath))
-	{	//初始化根路径
+	if (is_null($sPath)){	//初始化根路径
 		$sPath = $GLOBALS['SEA_PHP_FW_DIR_WEB_ROOT'] . $GLOBALS['SEA_PHP_FW_DIR_SPFW_ROOT'] .'/';
 	}
 	return $sPath;
@@ -70,27 +64,22 @@ function getFW_ROOT()
  * @return mixed|null
  * @global SEA_PHP_FW_DIR_MACHINE_ROOT, SEA_PHP_FW_DIR_WEB_ROOT, SEA_PHP_FW_DIR_SPFW_ROOT
  */
-function import($sPackage, $sFilename, $sRunClass=null)
-{
+function import($sPackage, $sFilename, $sRunClass=null){
 	$sLoadFilePath = getMAC_ROOT() . getFW_ROOT() . str_replace('.', '/', $sPackage) .'/' . $sFilename;
 	/*不做文件是否存在的检查，遇到错误让系统直接报错*/
 	if (empty($sRunClass))
 		return require $sLoadFilePath; //只加载文件操作(require效率高于require_once)
-	else
-	{	//加载类并返回新建的类对象
-		if (class_exists($sRunClass, false)) //判断类名是否已经加载
+	else{	//加载类并返回新建的类对象
+		if (class_exists($sRunClass, false)){ //判断类名是否已经加载
 			return new $sRunClass();//找到类创建对象
-		else
-		{	//类未加载，加载文件
-			if (file_exists($sLoadFilePath))
-			{
+		}else{	//类未加载，加载文件
+			if (file_exists($sLoadFilePath)){
 				require_once $sLoadFilePath; //加载类文件
-				if (class_exists($sRunClass, false))
+				if (class_exists($sRunClass, false)){
 					return new $sRunClass();//找到类创建对象
-				else
+				}else
 					return null; //文件加载成功但未找到类
-			}
-			else //类文件不存在
+			}else //类文件不存在
 				return null;
 		}
 	}
@@ -104,8 +93,7 @@ function import($sPackage, $sFilename, $sRunClass=null)
  * @return void
  * @global SEA_PHP_FW_VAR_ENV
  */
-function _dbg($obj, $sTitle=null)
-{
+function _dbg($obj, $sTitle=null){
 	if ($GLOBALS['SEA_PHP_FW_VAR_ENV']['show_debug_info'] === true)
 		dbg::D($obj, $sTitle);
 }
@@ -117,8 +105,7 @@ function _dbg($obj, $sTitle=null)
  * @return void
  * @global SEA_PHP_FW_VAR_ENV
  */
-function _dbge($obj)
-{
+function _dbge($obj){
 	if ($GLOBALS['SEA_PHP_FW_VAR_ENV']['show_debug_info'] === true)
 		dbg::DE($obj);
 }

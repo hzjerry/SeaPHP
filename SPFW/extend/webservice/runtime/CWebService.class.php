@@ -411,7 +411,7 @@ final class CWebService extends CExtModule implements IExtFramework
 				$this->throwState('915');
 
 			//系统会生成 正负一小时的验证码，做最多3次校验
-			$sCheckSum = $this->maInXML['checksum']['A']['value']; //取出checksum
+			$sCheckSum = strtolower($this->maInXML['checksum']['A']['value']); //取出checksum
 			$iUnixTimestamp = intval($this->maInXML['checksum']['A']['unix_timestamp']); //取出unix_timestamp
 			if ($sCheckSum == md5($this->msPackage . $this->msClass . $iUnixTimestamp . $sPackagePwd))
 			{	//校验第一步通过

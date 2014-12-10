@@ -5,8 +5,7 @@
  *  将会保存在$GLOBALS['SEA_PHP_FW_AUTOLOAD']中，由runtime.php加载
  *  @var array()
  * */
-return array
-(
+return array(
 'CWebsiteModule'=> //网站引擎的页面逻辑基类
 	array('package'=>'extend.website_engine.lib',	'file'=>'CWebsiteModule.class.php'),
 'CSessionOperat'=> //Session操作对象

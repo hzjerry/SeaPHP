@@ -5,8 +5,7 @@
  *  将会保存在$GLOBALS['SEA_PHP_FW_AUTOLOAD']中，由runtime.php加载
  *  @var array()
  * */
-return array
-(
+return array(
 'ISmsSend'=> //短信发送接口类
 	array('package'=>'extend.sms.lib',	'file'=>'ISmsSend.class.php'),
 );

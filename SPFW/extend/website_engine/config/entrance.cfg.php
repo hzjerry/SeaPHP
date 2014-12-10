@@ -5,8 +5,7 @@
  *
  * @var array
  * */
-return array
-(
+return array(
 	//工作区:agent	默认入口package:login
 	'agent'	=> 'LoginOpt',
 );

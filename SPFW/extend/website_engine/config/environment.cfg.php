@@ -4,8 +4,7 @@
  *
  * @var array
  * */
-return array
-(
+return array(
 	//网站引擎工作区业务逻辑根目录，里面的每个顶级子目录为一个工作区
 	'logic_workgroup'	=> 'workgroup.website_engine.logic',
 	//网站引擎静态缓存目录

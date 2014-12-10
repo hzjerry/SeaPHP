@@ -7,6 +7,7 @@
  * @version V20130415
  * <li>V20140626 修改了microtime()函数，提高运行效率</li>
  * <li>V20140928 修改了$GLOBALS['SEA_PHP_FW_VAR_HOST']全局变量，如果以命令行方式运行SEA_PHP_FW_VAR_HOST=null</li>
+ * <li>V20141210 对使用反向代理时通过HTTP_X_FORWARDED_FOR获取客户IP的方式做了优化。</li>
  */
 defined('SEA_PHP_INIT') or exit('sea php framework initialization step is not valid.'); //功能:让框架必须按顺序加载
 define('SEA_PHP_RUNTIME', true);  //功能:tag
@@ -31,9 +32,10 @@ if (!empty($GLOBALS['SEA_PHP_FW_VAR_ENV']['timezone'])) //时间区域初始化
 	date_default_timezone_set('PRC');
 
 /*获取访问者IP;例:60.186.90.130; $GLOBALS['FW_VAR']['IP']*/
-if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-	$GLOBALS['SEA_PHP_FW_VAR_IP'] = $_SERVER["HTTP_X_FORWARDED_FOR"];
-elseif (isset($_SERVER["HTTP_CLIENT_IP"]))
+if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])){ //存在反向代理时的IP获取
+	$aTmp = explode(', ', $_SERVER["HTTP_X_FORWARDED_FOR"], 2);
+	$GLOBALS['SEA_PHP_FW_VAR_IP'] = $aTmp[0]; //第一个IP为客户IP
+}elseif (isset($_SERVER["HTTP_CLIENT_IP"]))
 	$GLOBALS['SEA_PHP_FW_VAR_IP'] = $_SERVER["HTTP_CLIENT_IP"];
 elseif (isset($_SERVER["REMOTE_ADDR"]))
 	$GLOBALS['SEA_PHP_FW_VAR_IP'] = $_SERVER["REMOTE_ADDR"];

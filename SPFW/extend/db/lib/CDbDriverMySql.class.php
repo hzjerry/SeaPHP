@@ -251,11 +251,10 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::query()
 	 */
 	public function query($sSql, $bRW = null){
-		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
-
 		$this->startTimer();
 		$oResult = mysql_query($sSql, $odb);
 		$this->addSqlHistory($sSql);
@@ -280,7 +279,7 @@ class CDbDriverMySql extends CDbDriver{
 	public function queryPage($sSql, $iPage, $iPageSize, $bRW = null){
 		static $sTemplate = ' LIMIT {@start}, {@cnt}';
 
-		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -314,7 +313,7 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::queryOne()
 	 */
 	public function queryOne($sSql, $bRW = null){
-		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -338,7 +337,7 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::queryFirstRow()
 	 */
 	public function queryFirstRow($sSql, $bRW = null){
-		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -362,7 +361,7 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::queryFirstCol()
 	 */
 	public function queryFirstCol($sSql, $bRW = null){
-		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -392,7 +391,7 @@ class CDbDriverMySql extends CDbDriver{
 			$this->showSqlErr('0000', 'queryRowCallback () executable invalid Anonymous functions(or closures)');
 		}
 		$iRowCnt = 0;
-		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
 			return;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象

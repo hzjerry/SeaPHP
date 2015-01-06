@@ -2,13 +2,14 @@
 /**
  * 数据库操作层（CURD创建更新读取删除）
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20141009
+ * @version V0.20100104
  * <li>2013-05-07 jerryli 创立</li>
  * <li>2013-12-19 jerryli left_join(),from() 增加了强制指定索引</li>
  * <li>2014-06-22 jerryli 增加了UNID()函数，生成唯一识别号用于insert时的id字段(用于bigint字段)</li>
  * <li>2014-09-23 jerryli 修改了UNID()函数，末尾改为4位随机数，杜绝高频插入时出现主键相同的问题</li>
  * <li>2014-10-09 jerryli 修改了from(),left_join()函数；增加了inner_join()函数；此3个函数中加入了表名可以使用子查询的功能</li>
  * <li>2014-10-14 jerryli 增加了selectCallback()函数</li>
+ * <li>2015-01-04 jerryli 增加了procedure()函数，对存储过程进行支持</li>
 
  * @package SPFW.extend.db.lib
  */
@@ -953,6 +954,21 @@ class CDbCURD{
 	 */
 	public function exec($sSql){
 		return $this->moDBO->exec($sSql);
+	}
+	/**
+	 * 执行存储过程
+	 *  <li>只能执行含有输入参数IN类型的存储过程，不支持入口参数含有OUT类型的参数</li>
+	 *  <li>存储过程默认只能在主库上执行（因为可能存在更新操作）</li>
+	 * @param string $sProcName 存储过程名
+	 * @param array $aParam 输入参数
+	 * <li>注意:字符串型参数需要传入引号</li>
+	 * @param bool $bOutResult 是否含有输出结果集(默认为false,没有输出结果集)
+	 * @return null|array(array(array()))
+	 * <li>返回结果是一个三维数组；存储过程执后可能会返回多个数据集，每个数组为一个结果集</li>
+	 * @access public
+	 */
+	public function procedure($sProcName, $aParam, $bOutResult=false){
+		return $this->moDBO->procedure($sProcName, $aParam, $bOutResult);
 	}
 }
 ?>

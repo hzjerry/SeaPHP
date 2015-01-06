@@ -1,10 +1,11 @@
 <?php
 /**
  * mysqli数据库层驱动<br/>
- * 备注:必须php5.2.9以上<br />
- * 备注:当配置的只读库不不存在时，将自动连接到主库去读取
+ * <li>备注:必须php5.2.9以上</li>
+ * <li>注意:mysql函数不支持存储过程</li>
+ * <li>备注:当配置的只读库不不存在时，将自动连接到主库去读取</li>
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20130419
+ * @version V0.20150104
  * @package SPFW.entend.db.lib
  * @see IDbDriver
  * @example
@@ -49,8 +50,8 @@ class CDbDriverMySqli extends CDbDriver{
 	 * @param array $aSlave 只读库连接配置
 	 */
 	function __construct($sCharset, $aMaster, $aSlave=null){
-		if (version_compare(phpversion(), '5.2.9', '<')){	//当前版本不够运行
-			echo '<br/>mysqli running version must be &lt;= 5.2.9.';
+		if (version_compare(phpversion(), '5.0.0', '<')){	//当前版本不够运行
+			echo '<br/>mysqli running version must be &lt;= 5.0.0.';
 			exit(0);
 		}elseif (!class_exists('mysqli')){	//mysqli未安装
 			echo '<br/>mysqli is not installed.';
@@ -252,7 +253,7 @@ class CDbDriverMySqli extends CDbDriver{
 	 * @see IDbDriver::query()
 	 */
 	public function query($sSql, $bRW = null){
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -281,7 +282,7 @@ class CDbDriverMySqli extends CDbDriver{
 	public function queryPage($sSql, $iPage, $iPageSize, $bRW = null){
 		static $sTemplate = ' LIMIT {@start}, {@cnt}';
 
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -316,7 +317,7 @@ class CDbDriverMySqli extends CDbDriver{
 	 */
 	public function queryOne($sSql, $bRW = null)
 	{
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -340,7 +341,7 @@ class CDbDriverMySqli extends CDbDriver{
 	 * @see IDbDriver::queryFirstRow()
 	 */
 	public function queryFirstRow($sSql, $bRW = null){
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -368,7 +369,7 @@ class CDbDriverMySqli extends CDbDriver{
 			$this->showSqlErr('0000', 'queryRowCallback () executable invalid Anonymous functions(or closures)');
 		}
 		$iRowCnt = 0;
-			if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+			if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -395,7 +396,7 @@ class CDbDriverMySqli extends CDbDriver{
 	 * @see IDbDriver::queryFirstCol()
 	 */
 	public function queryFirstCol($sSql, $bRW = null){
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -416,7 +417,53 @@ class CDbDriverMySqli extends CDbDriver{
 				return $aRet;
 		}
 	}
+	/* (non-PHPdoc)
+	 * @see IDbDriver::procedure()
+	*/
+	public function procedure($sProcName, $aParam, $bOutResult){
+		$aSql = array('CALL ', $sProcName, '(');
+		if (!empty($aParam))
+			$aSql[] = implode(', ', $aParam);
+		$aSql[] = ');';
+		$sSql = implode('', $aSql);
+		unset($aSql);
 
+		$odb = $this->ConnWhenNeeded(true); //载入数据库连接资源对象
+		$this->startTimer();
+
+		$aRow = array();
+		$odb->autocommit(false);//关闭自动提交
+		if ($odb->multi_query($sSql)){
+			$this->addSqlHistory($sSql);
+			while(true) {
+				if (($results = $odb->store_result()) !== false){
+					if ($bOutResult){//需要返回值
+						$aTmp = array();
+						while(!is_null($aRet = $results->fetch_array(MYSQLI_ASSOC)))
+							$aTmp[] = $aRet;
+						$results->free(); //关闭返回集对象
+						unset($results);
+						$aRow[] = $aTmp; //追加一个返回值
+						unset($aTmp);
+					}
+				}
+
+				if ($odb->more_results()){ //检查是否还有更多返回集
+					$odb->next_result(); //取回下个返回集
+				}else{ //没有返回集了，终止循环
+					break;
+				}
+			}
+		}else{ //执行遇到错误
+			$this->showSqlErr($odb->errno, $odb->error);//SQL语句有问题
+		}
+		$odb->commit(); //指令全部执行成功，提交事务
+		$odb->autocommit(true);//打开自动事务提交
+		if ($bOutResult){
+			return (count($aRow) > 0)?$aRow:null;
+		}else
+			return null;
+	}
 	/* (non-PHPdoc)
 	 * @see IDbDriver::showApiVer()
 	 */

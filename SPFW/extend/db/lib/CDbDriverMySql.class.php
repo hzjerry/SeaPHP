@@ -1,12 +1,12 @@
 <?php
 /**
- * mysql数据库层驱动<br/>
- * 备注:当配置的只读库不不存在时，将自动连接到主库去读取
+ * mysql数据库层驱动
+ * <li>注意:mysql函数不支持存储过程</li>
+ * <li>备注:当配置的只读库不不存在时，将自动连接到主库去读取</li>
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20130419
+ * @version V0.20150104
  * @package SPFW.entend.db.lib
  * @see IDbDriver
- * @example
  * */
 class CDbDriverMySql extends CDbDriver{
 	/**
@@ -251,7 +251,7 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::query()
 	 */
 	public function query($sSql, $bRW = null){
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -279,7 +279,7 @@ class CDbDriverMySql extends CDbDriver{
 	public function queryPage($sSql, $iPage, $iPageSize, $bRW = null){
 		static $sTemplate = ' LIMIT {@start}, {@cnt}';
 
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -313,7 +313,7 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::queryOne()
 	 */
 	public function queryOne($sSql, $bRW = null){
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -337,7 +337,7 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::queryFirstRow()
 	 */
 	public function queryFirstRow($sSql, $bRW = null){
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -361,7 +361,7 @@ class CDbDriverMySql extends CDbDriver{
 	 * @see IDbDriver::queryFirstCol()
 	 */
 	public function queryFirstCol($sSql, $bRW = null){
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return null;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -391,7 +391,7 @@ class CDbDriverMySql extends CDbDriver{
 			$this->showSqlErr('0000', 'queryRowCallback () executable invalid Anonymous functions(or closures)');
 		}
 		$iRowCnt = 0;
-		if (preg_match('/^(select|call)\s+\S*/i', $sSql) == 0)
+		if (preg_match('/^(select)\s+\S*/i', $sSql) == 0)
 			return;
 
 		$odb = $this->ConnWhenNeeded($bRW); //载入数据库连接资源对象
@@ -408,6 +408,13 @@ class CDbDriverMySql extends CDbDriver{
 				mysql_free_result($oResult); //释放临时数据集
 			}
 		}
+	}
+
+	/* (non-PHPdoc)
+	 * @see IDbDriver::procedure()
+	*/
+	public function procedure($sProcName, $aParam, $bOutResult){
+		return null;
 	}
 
 	/* (non-PHPdoc)

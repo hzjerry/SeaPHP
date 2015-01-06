@@ -6,24 +6,20 @@
  * @access public
  * @final
  */
-final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView
-{
+final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView{
 	/**
 	 * 构造函数
 	 * @see CWebServiceApiLogic::__construct()
 	 */
-	function __construct()
-	{
+	function __construct(){
 		parent::__construct();
 	}
 
 	/*
 	 * @see CWebServiceApiLogic::initResultList()
 	*/
-	protected function initResultList()
-	{
-		return array
-		(
+	protected function initResultList(){
+		return array		(
 			'0000'=>'处理成功',
 			'0010'=>'用户不存在',
 		);
@@ -32,8 +28,7 @@ final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView
 	/*
 	 * @see CWebServiceApiLogic::run()
 	*/
-	public function run($aParam)
-	{
+	public function run($aParam){
 		$this->maXML['level'] = parent::createNode('admin');
 		$this->maXML['userid'] = parent::createNode(base64_encode($aParam['name']['C']));
 		$this->maXML['username'] = parent::createNode($aParam['name']['C'] .'一家');
@@ -52,16 +47,14 @@ final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView
 	/**
 	 * @see IProtocolView::getClassExplain()
 	 */
-	public function getClassExplain()
-	{
+	public function getClassExplain(){
 		return  '获取用户注册信息';
 	}
 
 	/**
 	 * @see IProtocolView::getUseExplain()
 	 */
-	public function getUseExplain()
-	{
+	public function getUseExplain(){
 		return '返回用户的信息列表，只有注册用户才能看到这个信息，必须填写用户ID'. "\n".
 			   '返回值中的 row 为记录集。';
 	}
@@ -69,16 +62,14 @@ final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView
 	/**
 	 * @see IProtocolView::getAccess()
 	 */
-	public function getAccess()
-	{
+	public function getAccess(){
 		return 'public';
 	}
 
 	/**
 	 * @see IProtocolView::getInProtocol()
 	 */
-	public function getInProtocol()
-	{
+	public function getInProtocol(){
 		$aXml = array();
 		$aXml['name'] = parent::createNode('待查询的用户名字，测试一下这个备注名称会很长很长，长到超出输入框的长度，是否会被截断[max:32]');
 		$aXml['userid'] = parent::createNode('用户ID[max:32]');
@@ -92,8 +83,7 @@ final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView
 	/**
 	 * @see IProtocolView::getOutProtocol()
 	 */
-	public function getOutProtocol()
-	{
+	public function getOutProtocol(){
 		$aXml = array();
 		$aXml['level'] = parent::createNode('会员级别[manage|admin|guest]');
 		$aXml['userid'] = parent::createNode('用户ID[fixed:13]');
@@ -111,8 +101,7 @@ final class GET_USER_INFO extends CWebServiceApiLogic implements IProtocolView
 	/**
 	 * @see IProtocolView::getUpdaueLog()
 	 */
-	public function getUpdaueLog()
-	{
+	public function getUpdaueLog(){
 		return array(array('date'=>'2013-06-02', 'author'=>'jerryli', 'memo'=>'接口创建'));
 	}
 }

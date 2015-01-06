@@ -3,13 +3,11 @@
  * 登录演示
  * @author JerryLi
  */
-class LoginOpt extends CWebsiteModule
-{
+class LoginOpt extends CWebsiteModule{
 	/* (non-PHPdoc)
 	 * @see CWebsiteModule::defaultFunc()
 	*/
-	public function getDefaultFunc()
-	{
+	public function getDefaultFunc(){
 		return 'login';
 	}
 
@@ -18,20 +16,16 @@ class LoginOpt extends CWebsiteModule
 	 * @param string $sCtl
 	 * @return void
 	 */
-	public function login($sCtl)
-	{
+	public function login($sCtl){
 		$sUName = P('uname');
 		$sPWD = P('pwd');
 
-		if ($sUName === 'test' && $sPWD === 'test')
-		{	//登录成功
-			if (P('rember') === 'true')
-			{	//用户选择了记住我的登录信息
+		if ($sUName === 'test' && $sPWD === 'test'){	//登录成功
+			if (P('rember') === 'true'){	//用户选择了记住我的登录信息
 				$this->setCookie('rember', 'true');
 				$this->setCookie('logname', $sUName);
 				$this->setCookie('pwd', $sPWD);
-			}
-			else
+			}else
 				$this->setCookie('rember', 'false');
 
 			//建立用户会话
@@ -40,9 +34,7 @@ class LoginOpt extends CWebsiteModule
 			$this->session->set('pwd', $sPWD);
 
 			$this->view->showMsg('succ', '登录成功，即将进入主页面', '登录测试', '?MainHome');
-		}
-		else
-		{
+		}else{
 			$this->session->destroy(); //释放session
 			$this->view->loadStaticCache(null, 30); //检查是否命中缓存
 			$this->view->showPage('LoginOpt_login.tpl');
@@ -55,8 +47,7 @@ class LoginOpt extends CWebsiteModule
 	 * @param string $sCtl
 	 * @return void
 	 */
-	public function loginOut($sCtl)
-	{
+	public function loginOut($sCtl){
 		$this->session->destroy(); //释放session
 		redirect('?LoginOpt-login'); //回到登录页面
 	}

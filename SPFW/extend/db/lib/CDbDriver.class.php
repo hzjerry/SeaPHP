@@ -198,6 +198,20 @@ abstract class CDbDriver{
 	 * @abstract
 	 */
 	abstract public function transaction($aSqls);
+	/**
+	 * 执行存储过程
+	 *  <li>只能执行含有输入参数IN类型的存储过程，不支持入口参数含有OUT类型的参数</li>
+	 *  <li>存储过程默认只能在主库上执行（因为可能存在更新操作）</li>
+	 * @param string $sProcName 存储过程名
+	 * @param array $aParam 输入参数
+	 * <li>注意:字符串型参数需要传入引号</li>
+	 * @param bool $bOutResult 是否含有输出结果集(false可以提高执行效率)
+	 * @return null|array(array(array()))
+	 * <li>返回结果是一个三维数组；存储过程执后可能会返回多个数据集，每个数组为一个结果集</li>
+	 * @access public
+	 * @abstract
+	 */
+	abstract public function procedure($sProcName, $aParam, $bOutResult);
 
 	/**
 	 * 查询指令<br />

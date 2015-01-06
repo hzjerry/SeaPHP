@@ -4,21 +4,18 @@
  * @author JerryLi
  *
  */
-class LoginOrReg extends CWebsiteModule
-{
+class LoginOrReg extends CWebsiteModule{
 	/**
 	 * 构造函数
 	 */
-	function __construct()
-	{
+	function __construct(){
 		$GLOBALS['SEA_PHP_FW_VAR_ENV']['show_debug_info'] = false;//强制关闭调试
 	}
 
 	/* (non-PHPdoc)
 	 * @see CWebsiteModule::defaultFunc()
 	*/
-	public function getDefaultFunc()
-	{
+	public function getDefaultFunc(){
 		return 'loginCheck';
 	}
 
@@ -27,8 +24,7 @@ class LoginOrReg extends CWebsiteModule
 	 * @param string $sCtl
 	 * @return void
 	 */
-	public function loginAgentCheck($sCtl)
-	{
+	public function loginAgentCheck($sCtl){
 		$sUName = G('uname');
 		$sPwd =  G('pwd');
 		if ($sUName === 'test' && $sPwd === 'test')

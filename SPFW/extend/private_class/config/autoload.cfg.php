@@ -7,7 +7,7 @@
  * */
 return array
 (
-'CApkResolve'=> //APK包文件，解析类(Android项目专用)
-	array('package'=>'extend.private_class.lib',	'file'=>'CApkResolve.class.php'),
+'QRcode'=> //二维码生成库函数
+	array('package'=>'extend.private_class.lib',	'file'=>'phpqrcode.php'),
 );
 ?>

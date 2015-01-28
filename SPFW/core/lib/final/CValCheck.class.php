@@ -2,15 +2,14 @@
 /**
  * 变量值校验类
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20130516
+ * @version V0.20150126
  * @package SPFW.core.lib.final
  * @final
  * @example
  * CValCheck::CK($sVal, $sRule);<br />
  * CValCheck::CK('hzjerry@gmail.com', array('email', 'strlen'=>array(5, 16)))<br />
  * */
-final class CValCheck
-{
+final class CValCheck{
 	/**
 	 * 检查变量
 	 * @param mixed $mixed	待检查的变量
@@ -34,13 +33,15 @@ final class CValCheck
 	 * CValCheck::CK($sVal, $sRule);<br />
 	 * CValCheck::CK('lijian@dns.com.cn', array('email', 'strlen'=>array(5, 16)))<br />
 	 */
-	static public function CK($mixed, $aRule)
-	{
+	static public function CK($mixed, $aRule){
 		//分离数组中的值与属性
 		$aSingle = array(); //单值
 		$aProp = array(); //属性
-		foreach ($aRule as $Key=>$Val)
-		{
+		if (empty($aRule))
+			return false;
+		if (!is_string($aRule)) //自动校正（默认输入应该为数组）
+			$aRule = array($aRule);
+		foreach ($aRule as $Key=>$Val){
 			if(is_int($Key))
 				array_push($aSingle, $Val);
 			else
@@ -99,13 +100,11 @@ final class CValCheck
 	 * @param array $aRule 规则array(最小长度int , 最大长度int)或array(定长int)
 	 * @return boolean
 	 */
-	static private function strlen(& $sStr, & $aRule)
-	{
+	static private function strlen(& $sStr, & $aRule){
 		$i = mb_strlen($sStr, 'utf-8');
-		if (count($aRule) == 1)
+		if (count($aRule) == 1){
 			return ($i == $aRule[0]);
-		else
-		{
+		}else{
 			sort($aRule);
 			list($iMin, $iMax) = $aRule;
 			return ($i >= $iMin && $i<=$iMax);
@@ -118,8 +117,7 @@ final class CValCheck
 	 * @param array $aRule
 	 * @return boolean
 	 */
-	static private function range(& $mun, & $aRule)
-	{
+	static private function range(& $mun, & $aRule){
 		sort($aRule);
 		list($iMin, $iMax) = $aRule;
 		return ($mun >= $iMin && $mun<=$iMax);
@@ -130,8 +128,7 @@ final class CValCheck
 	 * @param string $sData (yyyy/mm/dd | yyyy-mm-dd)
 	 * @return boolean
 	 */
-	static private function isData($sData)
-	{
+	static private function isData($sData){
 		if (empty($sData))
 			return false;
 		$test = strtotime($sData);
@@ -143,13 +140,11 @@ final class CValCheck
 	 * @param string $sTime (hh:mm:ss)
 	 * @return boolean
 	 */
-	static private function isTime($sTime)
-	{
+	static private function isTime($sTime){
 		if (empty($sTime))
 			return false;
 		$aTime = explode(':', $sTime);
-		if (count($aTime) == 3)
-		{
+		if (count($aTime) == 3){
 	        if (intval($aTime[0]) < 0 || intval($aTime[0]) >23)
 	        	return false;
 	        elseif (intval($aTime[1]) < 0 || intval($aTime[1]) >59)
@@ -158,8 +153,7 @@ final class CValCheck
 	        	return false;
 	        else
 	        	return true;
-		}
-        else
+		}else
         	return false;
 	}
 
@@ -168,8 +162,7 @@ final class CValCheck
 	 * @param $sData $sip IP地址(255:255:255:255)
 	 * @return boolean
 	 */
-	static private function isIPV4(& $sip)
-	{
+	static private function isIPV4(& $sip){
 		if (empty($sip))
 			return false;
         $test = ip2long($sip);
@@ -181,8 +174,7 @@ final class CValCheck
 	 * @param string $s
 	 * @return boolean
 	 */
-	static private function isDomain(& $s)
-	{
+	static private function isDomain(& $s){
 		if (empty($s))
 			return false;
 		return preg_match('/[a-z0-9\.]+/i', $s) != 0;
@@ -193,8 +185,7 @@ final class CValCheck
 	 * @param string $s
 	 * @return boolean
 	 */
-	static private function isEmail(& $s)
-	{
+	static private function isEmail(& $s){
 		if (empty($s))
 			return false;
         $spg = '/^[A-Za-z0-9]+([._\-\+]*[A-Za-z0-9]+)*@([A-Za-z0-9]+[-A-Za-z0-9]*[A-Za-z0-9]+\.)+[A-Za-z0-9]+$/';
@@ -206,8 +197,7 @@ final class CValCheck
      * @param string $str
      * @return bool
      */
-    static private function isChinese(& $s)
-    {
+    static private function isChinese(& $s){
     	if (empty($s))
     		return false;
     	return preg_match("/^[\x{4e00}-\x{9fa5}]+$/u",$s) != 0;
@@ -218,8 +208,7 @@ final class CValCheck
      * @param string $s
      * @return bool
      */
-    static private function havingChinese(& $s)
-    {
+    static private function havingChinese(& $s){
     	if (empty($s))
     		return false;
     	return preg_match("/[\x{4e00}-\x{9fa5}]/u",$s)? true : false;
@@ -230,8 +219,7 @@ final class CValCheck
      * @param string $s
      * @return bool
      */
-	static private function isTel(& $s)
-	{
+	static private function isTel(& $s){
 		return (ereg("^[+]?[0-9]+([-][0-9]+)*$", $s) > 0);
 	}
 
@@ -240,8 +228,7 @@ final class CValCheck
 	 * @param string $s
 	 * @return bool
 	 */
-	static private function isUrl(& $s)
-	{
+	static private function isUrl(& $s){
 		return preg_match('/^http[s]?:\/\/'.
 			'(([0-9]{1,3}\.){3}[0-9]{1,3}'. // IP形式的URL- 199.194.52.184
 			'|'. // 允许IP和DOMAIN（域名）
@@ -254,5 +241,4 @@ final class CValCheck
 			$s) == 1;
 	}
 }
-
 ?>

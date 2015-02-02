@@ -2,7 +2,7 @@
 /**
  * 变量值校验类
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20150126
+ * @version V0.20150202
  * @package SPFW.core.lib.final
  * @final
  * @example
@@ -39,7 +39,7 @@ final class CValCheck{
 		$aProp = array(); //属性
 		if (empty($aRule))
 			return false;
-		if (!is_string($aRule)) //自动校正（默认输入应该为数组）
+		if (is_string($aRule)) //自动校正（默认输入应该为数组）
 			$aRule = array($aRule);
 		foreach ($aRule as $Key=>$Val){
 			if(is_int($Key))
@@ -48,6 +48,7 @@ final class CValCheck{
 				$aProp[$Key] = $Val;
 		}
 		unset($aRule);
+
 		/*是否为数字或数字字符串*/
 		if (in_array('isnum', $aSingle) && !is_numeric($mixed))
 			return false;

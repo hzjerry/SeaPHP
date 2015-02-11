@@ -2,7 +2,7 @@
 /**
  * 变量值校验类
  * @author Jerryli(hzjerry@gmail.com)
- * @version V0.20150202
+ * @version V0.20150211
  * @package SPFW.core.lib.final
  * @final
  * @example
@@ -90,6 +90,9 @@ final class CValCheck{
 			return false;
 		/*是否为合法URL地址*/
 		if (in_array('isurl', $aSingle) && !self::isUrl($mixed))
+			return false;
+		/*是否为合法手机号*/
+		if (in_array('isphone', $aSingle) && !self::isPhone($mixed))
 			return false;
 
 		return true;
@@ -240,6 +243,21 @@ final class CValCheck{
 			'((\/\?)|'.  // a slash isn't required if there is no file name
 			'(\/[0-9a-zA-Z_!~`\'\(\)\[\]\.;\?:@&=\+\$,%#-\/^\*\|]*)?)$/',
 			$s) == 1;
+	}
+	/**
+	 * 是否为有效的手机号
+	 * @param string $s
+	 * @return bool
+	 */
+	static private function isPhone($s){
+		$aNumber = array('０'=>0, '１'=>1, '２'=>2, '３'=>3, '４'=>4, '５'=>5, '６'=>6, '７'=>7, '８'=>8, '９'=>9);
+		$sPhone = strtr($s, $aNumber);//全角过滤成半角
+		$regex = '/^1[3|4|7|8][0-9]{9}$|15[0|1|2|3|5|6|7|8|9]\d{8}$/';
+		if ( preg_match($regex, $sPhone) ){
+			return true;
+		}else{
+			return false;
+		}
 	}
 }
 ?>

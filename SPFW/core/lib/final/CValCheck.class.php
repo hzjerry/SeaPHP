@@ -27,6 +27,7 @@ final class CValCheck{
 	 * 'chinese': //是否为全中文(utf-8)<br />
 	 * 'having_chinese': //是包含中文中文(utf-8)<br />
 	 * 'istel': //是否为合法电话号码<br />
+	 * 'isphone': //是否为合法手机号码<br />
 	 * 'isurl': //是否为合法URL地址<br />
 	 * @return boolean
 	 * @example
